@@ -1,2 +1,2 @@
 # bmap
-a Sites plugin tool for creating augmented projection installation in a web browser 
+an artSite plugin tool for creating augmented projection installations in a web browser 
