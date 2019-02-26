@@ -1,5 +1,6 @@
 import os, json, jinja2
-from flask import Flask, request, render_template_string, send_from_directory, redirect
+from flask import Flask, request, render_template_string, send_from_directory, redirect, session
+from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
 Settings = {}
 Error = []
 
@@ -11,26 +12,37 @@ def loadSettings(settingsJSON):
 
 
 
-def render(artwork, user):
+def render(artwork, user, path):
 	global Error
 	if len(Error) > 0 :
 		out = "<h1>Errors :</h1>" + "<br />".join(Error)
-		Error = []	
+		Error = []
+		return out	
 	else:
-		out = "succesfully loaded plugin"
-		if request.args.get('q') != None:		
-			out = "q = " + request.args.get('q') 
+		templateData = {}
+		templateData['artwork'] = artwork
+		templateData['user'] = user
+		templateData['URL'] = "/a/" + str(artwork.id)
+		session["path"] = templateData['URL']
+		if path != None:		
+			templateData['section'] = path
 		else:
-			
+			templateData['section'] = 'scene'
+		
+		if current_user.is_authenticated == True:
+			currentTemplate = "template.html"
 			path = os.path.abspath(__file__)
 			dir_path = os.path.dirname(path)
-			with open(dir_path +'/template/template.html') as file_:
-	    			template = jinja2.Template(file_.read())
-			templateData = {}
-			templateData['artwork'] = artwork
-			templateData['user'] = user
+			templateData['alerts'] = render_template_string("""{% extends "alerts.html" %}""")			
+			with open(dir_path +'/template/' + currentTemplate) as file_:
+		    		template = jinja2.Template(file_.read())
+			
 			out = template.render(tmp=templateData)
-	return out
+			return out			
+		else:
+			return redirect('/user/sign-in')
+
+		
 
 
 	
