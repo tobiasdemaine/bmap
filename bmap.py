@@ -27,7 +27,7 @@ def render(artwork, user, path):
 		if path != None:		
 			templateData['section'] = path
 		else:
-			templateData['section'] = 'scene'
+			templateData['section'] = 'que'
 		
 		if current_user.is_authenticated == True:
 			currentTemplate = "template.html"

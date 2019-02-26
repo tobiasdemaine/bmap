@@ -1,96 +1,190 @@
-$( document ).ready(function() {
-         /* Step1: Prepare the canvas and get WebGL context */
+if ( WEBGL.isWebGLAvailable() === false ) {
 
-         var canvas = document.getElementById('sceneCanvas');
-         var gl = canvas.getContext('webgl');
+				document.body.appendChild( WEBGL.getWebGLErrorMessage() );
+				document.getElementById( 'container' ).innerHTML = "";
 
-         /* Step2: Define the geometry and store it in buffer objects */
+			}
 
-         var vertices = [-0.5, 0.5, -0.5, -0.5, 0.0, -0.5,];
+			var container, stats;
 
-         // Create a new buffer object
-         var vertex_buffer = gl.createBuffer();
+			var camera, controls, scene, renderer;
 
-         // Bind an empty array buffer to it
-         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
-         
-         // Pass the vertices data to the buffer
-         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+			var mesh, texture;
 
-         // Unbind the buffer
-         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+			var worldWidth = 256, worldDepth = 256,
+				worldHalfWidth = worldWidth / 2, worldHalfDepth = worldDepth / 2;
 
-         /* Step3: Create and compile Shader programs */
+			var clock = new THREE.Clock();
 
-         // Vertex shader source code
-         var vertCode =
-            'attribute vec2 coordinates;' + 
-            'void main(void) {' + ' gl_Position = vec4(coordinates,0.0, 1.0);' + '}';
+			init();
+			animate();
 
-         //Create a vertex shader object
-         var vertShader = gl.createShader(gl.VERTEX_SHADER);
+			function init() {
 
-         //Attach vertex shader source code
-         gl.shaderSource(vertShader, vertCode);
+				container = document.getElementById( 'container' );
 
-         //Compile the vertex shader
-         gl.compileShader(vertShader);
+				camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 20000 );
 
-         //Fragment shader source code
-         var fragCode = 'void main(void) {' + 'gl_FragColor = vec4(0.0, 0.0, 0.0, 0.1);' + '}';
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xbfd1e5 );
 
-         // Create fragment shader object
-         var fragShader = gl.createShader(gl.FRAGMENT_SHADER);
+				controls = new THREE.FirstPersonControls( camera );
+				controls.movementSpeed = 1000;
+				controls.lookSpeed = 0.1;
 
-         // Attach fragment shader source code
-         gl.shaderSource(fragShader, fragCode);
+				var data = generateHeight( worldWidth, worldDepth );
 
-         // Compile the fragment shader
-         gl.compileShader(fragShader);
+				camera.position.y = data[ worldHalfWidth + worldHalfDepth * worldWidth ] * 10 + 500;
 
-         // Create a shader program object to store combined shader program
-         var shaderProgram = gl.createProgram();
+				var geometry = new THREE.PlaneBufferGeometry( 7500, 7500, worldWidth - 1, worldDepth - 1 );
+				geometry.rotateX( - Math.PI / 2 );
 
-         // Attach a vertex shader
-         gl.attachShader(shaderProgram, vertShader); 
-         
-         // Attach a fragment shader
-         gl.attachShader(shaderProgram, fragShader);
+				var vertices = geometry.attributes.position.array;
 
-         // Link both programs
-         gl.linkProgram(shaderProgram);
+				for ( var i = 0, j = 0, l = vertices.length; i < l; i ++, j += 3 ) {
 
-         // Use the combined shader program object
-         gl.useProgram(shaderProgram);
+					vertices[ j + 1 ] = data[ i ] * 10;
 
-         /* Step 4: Associate the shader programs to buffer objects */
+				}
 
-         //Bind vertex buffer object
-         gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer);
+				texture = new THREE.CanvasTexture( generateTexture( data, worldWidth, worldDepth ) );
+				texture.wrapS = THREE.ClampToEdgeWrapping;
+				texture.wrapT = THREE.ClampToEdgeWrapping;
 
-         //Get the attribute location
-         var coord = gl.getAttribLocation(shaderProgram, "coordinates");
+				mesh = new THREE.Mesh( geometry, new THREE.MeshBasicMaterial( { map: texture } ) );
+				scene.add( mesh );
 
-         //point an attribute to the currently bound VBO
-         gl.vertexAttribPointer(coord, 2, gl.FLOAT, false, 0, 0);
+				renderer = new THREE.WebGLRenderer();
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
 
-         //Enable the attribute
-         gl.enableVertexAttribArray(coord);
+				container.innerHTML = "";
 
-         /* Step5: Drawing the required object (triangle) */
+				container.appendChild( renderer.domElement );
 
-         // Clear the canvas
-         gl.clearColor(0.5, 0.5, 0.5, 0.9);
+				stats = new Stats();
+				container.appendChild( stats.dom );
 
-         // Enable the depth test
-         gl.enable(gl.DEPTH_TEST); 
-         
-         // Clear the color buffer bit
-         gl.clear(gl.COLOR_BUFFER_BIT);
+				//
 
-         // Set the view port
-         gl.viewport(0,0,canvas.width,canvas.height);
+				window.addEventListener( 'resize', onWindowResize, false );
 
-         // Draw the triangle
-         gl.drawArrays(gl.TRIANGLES, 0, 3);
-});
+			}
+
+			function onWindowResize() {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				controls.handleResize();
+
+			}
+
+			function generateHeight( width, height ) {
+
+				var size = width * height, data = new Uint8Array( size ),
+					perlin = new ImprovedNoise(), quality = 1, z = Math.random() * 100;
+
+				for ( var j = 0; j < 4; j ++ ) {
+
+					for ( var i = 0; i < size; i ++ ) {
+
+						var x = i % width, y = ~ ~ ( i / width );
+						data[ i ] += Math.abs( perlin.noise( x / quality, y / quality, z ) * quality * 1.75 );
+
+					}
+
+					quality *= 5;
+
+				}
+
+				return data;
+
+			}
+
+			function generateTexture( data, width, height ) {
+
+				var canvas, canvasScaled, context, image, imageData, vector3, sun, shade;
+
+				vector3 = new THREE.Vector3( 0, 0, 0 );
+
+				sun = new THREE.Vector3( 1, 1, 1 );
+				sun.normalize();
+
+				canvas = document.createElement( 'canvas' );
+				canvas.width = width;
+				canvas.height = height;
+
+				context = canvas.getContext( '2d' );
+				context.fillStyle = '#000';
+				context.fillRect( 0, 0, width, height );
+
+				image = context.getImageData( 0, 0, canvas.width, canvas.height );
+				imageData = image.data;
+
+				for ( var i = 0, j = 0, l = imageData.length; i < l; i += 4, j ++ ) {
+
+					vector3.x = data[ j - 2 ] - data[ j + 2 ];
+					vector3.y = 2;
+					vector3.z = data[ j - width * 2 ] - data[ j + width * 2 ];
+					vector3.normalize();
+
+					shade = vector3.dot( sun );
+
+					imageData[ i ] = ( 96 + shade * 128 ) * ( 0.5 + data[ j ] * 0.007 );
+					imageData[ i + 1 ] = ( 32 + shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
+					imageData[ i + 2 ] = ( shade * 96 ) * ( 0.5 + data[ j ] * 0.007 );
+
+				}
+
+				context.putImageData( image, 0, 0 );
+
+				// Scaled 4x
+
+				canvasScaled = document.createElement( 'canvas' );
+				canvasScaled.width = width * 4;
+				canvasScaled.height = height * 4;
+
+				context = canvasScaled.getContext( '2d' );
+				context.scale( 4, 4 );
+				context.drawImage( canvas, 0, 0 );
+
+				image = context.getImageData( 0, 0, canvasScaled.width, canvasScaled.height );
+				imageData = image.data;
+
+				for ( var i = 0, l = imageData.length; i < l; i += 4 ) {
+
+					var v = ~ ~ ( Math.random() * 5 );
+
+					imageData[ i ] += v;
+					imageData[ i + 1 ] += v;
+					imageData[ i + 2 ] += v;
+
+				}
+
+				context.putImageData( image, 0, 0 );
+
+				return canvasScaled;
+
+			}
+
+			//
+
+			function animate() {
+
+				requestAnimationFrame( animate );
+
+				render();
+				stats.update();
+
+			}
+
+			function render() {
+
+				controls.update( clock.getDelta() );
+				renderer.render( scene, camera );
+
+			}
+

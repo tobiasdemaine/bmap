@@ -15,20 +15,12 @@
 
   <body>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">{{ tmp.artwork.name }}</a>
-      <a class="navbar-nav col-md-8" href="#">{{ tmp.user.email }}</a>
-      <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-          <a class="nav-link" href="/user/sign-out">Sign Out</a>
-        </li>
-      </ul>
-    </nav>
-
-    <div class="container-fluid">
-      <div class="row">
-        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-          <div class="sidebar-sticky">
-            <ul class="nav flex-column">
+      <div class="navbar-brand col-sm-3 col-md-2 mr-0 dropdown nopadding">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          {{ tmp.artwork.name }}
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <ul class="nav flex-column">
               <li class="nav-item">
                 <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/scene">
                   <span data-feather="home"></span>
@@ -47,19 +39,42 @@
                   My Content
                 </a>
               </li>
+	      <li class="nav-item ">
+                <a class="nav-link "  href="#">
+                  <span data-feather="file-text"></span>
+                  {{ tmp.user.email }}
+                </a>
+              </li>
             </ul>
-	  </div>
-        </nav>
+        </div>
+      </div>
+
+      <a class="navbar-nav col-md-6" href="#"></a>
+      <ul class="navbar-nav px-3">
+        <li class="nav-item text-nowrap">
+          <a class="nav-link" href="/user/sign-out">Sign Out</a>
+        </li>
+      </ul>
+    </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+       
 
         
 	
 	{% if tmp.section == "scene" %}
-	<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
-		<canvas class="sceneCanvasDefault" id="sceneCanvas"></canvas>
+	<main role="main" class="">
+		<div id="container"><br /><br /><br /><br /><br />Generating world...</div>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/three.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/controls/FirstPersonControls.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/ImprovedNoise.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/WebGL.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/libs/stats.min.js"></script>
 	</main>
 	{% endif %}
 	{% if tmp.section == "que" %}
-	<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
             <h1 class="h2">The Que</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
@@ -73,7 +88,7 @@
         </main>
         {% endif %}
 	{% if tmp.section == "content" %}
-	<main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
             <h1 class="h2">My Content</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
