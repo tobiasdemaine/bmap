@@ -100,10 +100,89 @@ body {
 }
 
 /*
+ * DEPTH MAPPING IN SCENE SETUP
+ */
+ #video {
+ 	width:640px;
+ 	height:480px;
+ 	position:absolute;
+ 	top: 100vh;
+ }
+ 
+ #depthMap {
+ position: absolute;
+  top: 0px; /* Height of navbar */
+  left: 0px;
+  height: 100%;
+  width: 100%;
+ }
+ 
+ .vline1{
+ 	--ww : calc( vh100 / 20);
+ 	background-repeat:repeat;
+ 	background-image:
+ 	repeating-linear-gradient(90deg, /* Main layer */
+    black,
+    black var(--ww),
+    white calc(var(--ww)*2),
+    white calc(var(--ww)*3),
+    black calc(var(--ww)*4),
+    black calc(var(--ww)*5));
+ }
+ 
+  
+ .smallGrid{
+    background-image: /* tint image */
+                      linear-gradient(to right, rgba(192, 192, 192, 0.75), rgba(192, 192, 192, 0.75)),
+                      /* checkered effect */
+                      linear-gradient(to right, black 50%, white 50%),
+                      linear-gradient(to bottom, black 50%, white 50%);
+    background-blend-mode: normal, difference, normal;
+    background-size: 2em 2em;
+}
+.mediumGrid{
+    background-image: /* tint image */
+                      linear-gradient(to right, rgba(192, 192, 192, 0.75), rgba(192, 192, 192, 0.75)),
+                      /* checkered effect */
+                      linear-gradient(to right, black 50%, white 50%),
+                      linear-gradient(to bottom, black 50%, white 50%);
+    background-blend-mode: normal, difference, normal;
+    background-size: 4em 4em;
+}
+.bigGrid{
+    background-image: /* tint image */
+                      linear-gradient(to right, rgba(192, 192, 192, 0.75), rgba(192, 192, 192, 0.75)),
+                      /* checkered effect */
+                      linear-gradient(to right, black 50%, white 50%),
+                      linear-gradient(to bottom, black 50%, white 50%);
+    background-blend-mode: normal, difference, normal;
+    background-size: 6em 6em;
+}
+.smallLine{
+	background: linear-gradient( to bottom, #efefef, #efefef 50%, #333 50%, #333);
+	background-size: 100% 2em;
+}
+.mediumLine{
+	background: linear-gradient( to bottom, #efefef, #efefef 50%, #333 50%, #333);
+	background-size: 100% 4em;
+}
+.bigLine{
+	background: linear-gradient( to bottom, #efefef, #efefef 50%, #333 50%, #333);
+	background-size: 100% 6em;
+}
+/*
  * SCENE
  */
-
-.sceneCanvasDefault {
+#three {
+  position: absolute;
+  top: 0px; /* Height of navbar */
+  left: 0px;
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+}
+#container {
   position: absolute;
   top: 0px; /* Height of navbar */
   left: 0px;

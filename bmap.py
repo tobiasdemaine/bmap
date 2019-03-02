@@ -1,4 +1,5 @@
-import os, json, jinja2
+import shutil, os, json, jinja2, base64
+import uuid
 from flask import Flask, request, render_template_string, send_from_directory, redirect, session
 from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
 Settings = {}
@@ -30,19 +31,46 @@ def render(artwork, user, path):
 			templateData['section'] = 'que'
 		
 		if current_user.is_authenticated == True:
-			currentTemplate = "template.html"
-			path = os.path.abspath(__file__)
-			dir_path = os.path.dirname(path)
-			templateData['alerts'] = render_template_string("""{% extends "alerts.html" %}""")			
-			with open(dir_path +'/template/' + currentTemplate) as file_:
-		    		template = jinja2.Template(file_.read())
-			
-			out = template.render(tmp=templateData)
-			return out			
+			if templateData['section'] == "dataurltofile":
+				
+				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maptemp"
+				
+				if os.path.exists(directory):
+					shutil.rmtree(directory)
+				os.makedirs(directory)
+				p = []
+				for x in range(5):
+					fileNamePath = directory + "/" +str(uuid.uuid1()) + ".png"
+					p.append(fileNamePath)
+					#print str("img"+str(x))
+					data = request.form.get(str("img"+str(x)))
+					#print data
+					convert_and_save(data, fileNamePath)
+					
+				
+				return "Done"
+			else:
+				currentTemplate = "template.html"
+				path = os.path.abspath(__file__)
+				dir_path = os.path.dirname(path)
+				templateData['alerts'] = render_template_string("""{% extends "alerts.html" %}""")			
+				with open(dir_path +'/template/' + currentTemplate) as file_:
+			    		template = jinja2.Template(file_.read())
+				
+				out = template.render(tmp=templateData)
+				return out			
 		else:
 			return redirect('/user/sign-in')
 
-		
 
+
+
+
+def convert_and_save(b64_string, imgPath):
+	header, encoded = b64_string.split(",", 1)
+	encoded += '=' * (-len(b64_string) % 4)  # restore stripped '='s
+	
+	with open(imgPath, "wb") as fh:
+		fh.write(encoded.decode('base64'))
 
 	

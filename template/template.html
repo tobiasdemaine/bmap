@@ -14,13 +14,21 @@
   </head>
 
   <body>
-    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+  
+  
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0" id="mainNav">
       <div class="navbar-brand col-sm-3 col-md-2 mr-0 dropdown nopadding">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           {{ tmp.artwork.name }}
         </a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <ul class="nav flex-column">
+              <li class="nav-item">
+                <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/setup">
+                  <span data-feather="home"></span>
+                  Setup
+                </a>
+              </li>
               <li class="nav-item">
                 <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/scene">
                   <span data-feather="home"></span>
@@ -57,22 +65,49 @@
       </ul>
     </nav>
 
+	
     <div class="container-fluid">
       <div class="row">
-       
+   {% if tmp.section == "setup" %}
+    	<div id="depthMap" class="vline1">
+    		
+    	</div>
+    	<div class="modal" tabindex="-1" role="dialog" id="helpModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Setup the Map</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Setup requires projection of several grid sequences. Ensure you Camera is placed on top of the projector, your projector is switched on and mirroring this screen</p>
+      </div>
+      <div class="modal-footer">
+        <button id="startSetup" type="button" class="btn btn-primary">Start</button>
+      </div>
+    </div>
+  </div>
+</div>
+<video id="video" autoplay></video>
+ 	<div id="three"></div>
+	<script src="/assets/{{tmp.artwork.id}}/js/3/three.js"></script>
+	<script src="/assets/{{tmp.artwork.id}}/js/3/libs/stats.min.js"></script>
 
+   {% endif %}
+    
+    
+   {% if tmp.section == "scene" %}
+		<div id="container"></div>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/three.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/loaders/DDSLoader.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/loaders/MTLLoader.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/loaders/OBJLoader.js"></script>
+		<script src="/assets/{{tmp.artwork.id}}/js/3/libs/stats.min.js"></script>
+	{% endif %}
         
 	
-	{% if tmp.section == "scene" %}
-	<main role="main" class="">
-		<div id="container"><br /><br /><br /><br /><br />Generating world...</div>
-		<script src="/assets/{{tmp.artwork.id}}/js/3/three.js"></script>
-		<script src="/assets/{{tmp.artwork.id}}/js/3/controls/FirstPersonControls.js"></script>
-		<script src="/assets/{{tmp.artwork.id}}/js/3/ImprovedNoise.js"></script>
-		<script src="/assets/{{tmp.artwork.id}}/js/3/WebGL.js"></script>
-		<script src="/assets/{{tmp.artwork.id}}/js/3/libs/stats.min.js"></script>
-	</main>
-	{% endif %}
 	{% if tmp.section == "que" %}
 	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
@@ -86,7 +121,8 @@
            </div>
 		<div id="schedule" class=""></div>
         </main>
-        {% endif %}
+    {% endif %}
+	
 	{% if tmp.section == "content" %}
 	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
@@ -131,16 +167,19 @@
       </div>
     </div>
 
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" ></script>
-   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <script src="/assets/{{tmp.artwork.id}}/js/scripts.js"></script>
+    {% if tmp.section == "setup" %}
+    <script src="/assets/{{tmp.artwork.id}}/js/setup.js"></script>
+	{% endif %}
     {% if tmp.section == "scene" %}
 	 <script src="/assets/{{tmp.artwork.id}}/js/scene.js"></script>
+	 <script>
+	  init("/assets/{{tmp.artwork.id}}/obj/test3.obj", "/assets/{{tmp.artwork.id}}/obj/test3.mtl", "/assets/{{tmp.artwork.id}}/obj/texture.png");
+	  animate();
+	</script>
     {% endif %}
     {% if tmp.section == "que" %}
 	 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
