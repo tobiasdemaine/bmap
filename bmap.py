@@ -71,6 +71,6 @@ def convert_and_save(b64_string, imgPath):
 	encoded += '=' * (-len(b64_string) % 4)  # restore stripped '='s
 	
 	with open(imgPath, "wb") as fh:
-		fh.write(encoded.decode('base64'))
+		fh.write(base64.b64decode(encoded))
 
 	

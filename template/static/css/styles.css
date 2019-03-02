@@ -170,6 +170,17 @@ body {
 	background: linear-gradient( to bottom, #efefef, #efefef 50%, #333 50%, #333);
 	background-size: 100% 6em;
 }
+
+/* 
+ *GUI
+ */
+
+#gui {
+	position:absolute;
+	top:48px;
+	right:0px;
+}
+
 /*
  * SCENE
  */
