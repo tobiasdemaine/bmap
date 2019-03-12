@@ -14,6 +14,7 @@ def loadSettings(settingsJSON):
 
 
 def render(artwork, user, path):
+	currentTemplate = "template.html"
 	global Error
 	if len(Error) > 0 :
 		out = "<h1>Errors :</h1>" + "<br />".join(Error)
@@ -27,8 +28,14 @@ def render(artwork, user, path):
 		session["path"] = templateData['URL']
 		if path != None:		
 			templateData['section'] = path
+			if path == 'setup':
+				currentTemplate = "bMap.html"
+				
+				
 		else:
 			templateData['section'] = 'que'
+		
+		
 		
 		if current_user.is_authenticated == True:
 			if templateData['section'] == "dataurltofile":
@@ -50,7 +57,7 @@ def render(artwork, user, path):
 				
 				return "Done"
 			else:
-				currentTemplate = "template.html"
+				
 				path = os.path.abspath(__file__)
 				dir_path = os.path.dirname(path)
 				templateData['alerts'] = render_template_string("""{% extends "alerts.html" %}""")			

@@ -91,12 +91,15 @@
   </div>
 </div>
 <video id="video" autoplay></video>
- 	<div id="three"></div>
- 	<script type="text/javascript" src="/assets/{{tmp.artwork.id}}/js/datgui/dat.gui.min.js"></script>
-	<script src="/assets/{{tmp.artwork.id}}/js/3/three.js"></script>
-	<script src="/assets/{{tmp.artwork.id}}/js/3/controls/OrbitControls.js"></script>
+<div id="three"></div>
+ 	<script src="/assets/{{tmp.artwork.id}}/js/3/three.js"></script>
+	
+	<script src="/assets/{{tmp.artwork.id}}/js/3/QuickHull.js"></script>
+	<script src="/assets/{{tmp.artwork.id}}/js/3/geometries/ConvexGeometry.js"></script>
+	<script src="/assets/{{tmp.artwork.id}}/js/3/TypedArrayUtils.js"></script>
 	<script src="/assets/{{tmp.artwork.id}}/js/3/libs/stats.min.js"></script>
-
+	<script src="https://unpkg.com/delaunator@3.0.2/delaunator.js"></script>
+    <script src="/assets/{{tmp.artwork.id}}/js/3/controls/OrbitControls.js"></script>
    {% endif %}
     
     
@@ -194,7 +197,6 @@
     {% if tmp.section == "content" %}
     {% endif %}
     <!-- Icons -->
-    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
     <script>
       feather.replace()
     </script>
