@@ -13,7 +13,7 @@ noiseThreshold = 0.0;
 zscale = 80;
 zskew = 20; 
 renderDetail = 3;
-fisheye = 10;
+
 
 $(function() {
 	$("#mainNav").hide()
@@ -769,7 +769,27 @@ bMapGui = function(){
 mapStart = -30
 
 function saveScene(){
-
+	// point cloud
+	var exporter = new THREE.PLYExporter();
+	options = {
+	
+	}
+	var bmapScene = {}
+	bmapScene.polygons = []
+	bmapScene.frustrums = []
+	bMapScene.camera = {}
+	bMapScene.renderMap = {}
+	// layers
+	bMapScene.camera.fov
+	bMapScene.camera.lookat = {x:0 ,y:0, z:0}
+	bMapScene.camera.rotation = {x:0 ,y:0, z:0}
+	bMapScene.camera.position = {x:0 ,y:0, z:0}
+	var pointCloud = exporter.parse( scene, options );
+	for (l=0;l<maps.length;l++){
+		bmapScene.polygons.push(exporter.parse( scene, options ));
+		bmapScene.frustums.push(exporter.parse( scene, options ));
+	}
+	//	
 }
 
 
