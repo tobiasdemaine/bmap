@@ -38,16 +38,29 @@ def render(artwork, user, path):
 		
 		
 		if current_user.is_authenticated == True:
-			if templateData['section'] == "dataurltofile":
+			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maptemp"
+			if templateData['section'] == "datatofile":
+				if os.path.exists(directory):
+					shutil.rmtree(directory)
+				os.makedirs(directory)
+				fileNamePath = directory + "/bmap.json"
+				data = request.form.get("data")
+				file = open(fileNamePath, 'w') 
+				file.write(data) 
+				file.close() 
+				return "Done"
+			
+			
+			elif templateData['section'] == "dataurltofile":
 				
-				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maptemp"
+				
 				
 				if os.path.exists(directory):
 					shutil.rmtree(directory)
 				os.makedirs(directory)
 				p = []
 				for x in range(5):
-					fileNamePath = directory + "/" +str(uuid.uuid1()) + ".png"
+					fileNamePath = directory + "/phase" + str(x) + ".png"
 					p.append(fileNamePath)
 					#print str("img"+str(x))
 					data = request.form.get(str("img"+str(x)))

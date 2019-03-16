@@ -777,19 +777,33 @@ function saveScene(){
 	var bmapScene = {}
 	bmapScene.polygons = []
 	bmapScene.frustrums = []
-	bMapScene.camera = {}
-	bMapScene.renderMap = {}
+	bmapScene.editPoints = []
+	bmapScene.camera = {}
+	bmapScene.renderMap = {}
 	// layers
-	bMapScene.camera.fov
-	bMapScene.camera.lookat = {x:0 ,y:0, z:0}
-	bMapScene.camera.rotation = {x:0 ,y:0, z:0}
-	bMapScene.camera.position = {x:0 ,y:0, z:0}
-	var pointCloud = exporter.parse( scene, options );
+	bmapScene.camera.fov
+	bmapScene.camera.lookat = {x:0 ,y:0, z:0}
+	bmapScene.camera.rotation = {x:0 ,y:0, z:0}
+	bmapScene.camera.position = {x:0 ,y:0, z:0}
+	bmapScene.pointCloud = bufferpoints.geometry.toJSON();
 	for (l=0;l<maps.length;l++){
-		bmapScene.polygons.push(exporter.parse( scene, options ));
-		bmapScene.frustums.push(exporter.parse( scene, options ));
+		bmapScene.polygons.push(maps[l].mesh.geometry.toJSON());
+		bmapScene.frustrums.push(maps[l].frustumHelper.geometry.toJSON());
+		var positions = []
+		for(k=0;k<maps[l].editPoints.length;k++){
+			positions.push(maps[l].editPoints[k].position)
+		}
+		bmapScene.editPoints.push(positions)
 	}
-	//	
+	ur = window.location.href.split("/").reverse()
+	url = "/" + ur[2] + "/" + ur[1] + "/datatofile";
+	data = {}
+	data["data"] = JSON.stringify(bmapScene)
+	console.log(data)
+	$.post( url, data ).done(function( data ) {
+		alert(data);
+		//console.log(data)
+	});
 }
 
 
