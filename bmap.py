@@ -39,7 +39,13 @@ def render(artwork, user, path):
 		
 		if current_user.is_authenticated == True:
 			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maptemp"
-			if templateData['section'] == "datatofile":
+			if templateData['section'] == "getmapdata":
+			 	fileNamePath = directory + "/bmap.json"
+			 	with open(fileNamePath) as file_:
+			 		data = file_.read()
+			 	return data
+			
+			elif templateData['section'] == "datatofile":
 				if os.path.exists(directory):
 					shutil.rmtree(directory)
 				os.makedirs(directory)

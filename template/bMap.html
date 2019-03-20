@@ -27,7 +27,13 @@
 						</button>
 					</div>
 					<div class="modal-body">
-						<p>Setup requires projection of several grid sequences. Ensure you Camera is placed on top of the projector, your projector is switched on and mirroring this screen</p>
+						<input type="checkbox" id="fullscreen"> fullscreen
+						<div>
+							Start from <br />
+							<input type="radio" name="loadSequence" id="loadSequence" value='phase'> Phase Capture <br />
+							<input type="radio" name="loadSequence" id="loadSequence" value='images'> Images <br />
+							<input type="radio" name="loadSequence" id="loadSequence" value='model'> Model <br />
+						</div>
 					</div>
 					<div class="modal-footer">
 						<button id="startSetup" type="button" class="btn btn-primary">Start</button>
@@ -50,9 +56,6 @@
 		
 		<script src="/assets/{{tmp.artwork.id}}/js/3/controls/OrbitControls.js"></script>
 		<script src="/assets/{{tmp.artwork.id}}/js/3/controls/TransformControls.js"></script>
-		<script src="/assets/{{tmp.artwork.id}}/js/3/exporters/PLYExporter.js"></script>
-		
-		
 		
 		<script src="/assets/{{tmp.artwork.id}}/js/setup.js"></script>
 	
