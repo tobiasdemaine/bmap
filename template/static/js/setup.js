@@ -283,37 +283,37 @@ function matrix( rows, cols, defaultValue){
 
 
 function webCamSetup(){
-	    var video = document.getElementById('video');
-	    var mediaConfig =  { video: true };
-        var errBack = function(e) {
-        	//console.log('An error has occurred!', e)
-        };
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
-				video.srcObject = stream;
-                video.play();
-                localStream = stream
-            });
-        }
-        else if(navigator.getUserMedia) { // Standard
-			navigator.getUserMedia(mediaConfig, function(stream) {
-				video.src = stream;
-				video.play();
-				localStream = stream
-			}, errBack);
-		} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
-			navigator.webkitGetUserMedia(mediaConfig, function(stream){
-				video.src = window.webkitURL.createObjectURL(stream);
-				video.play();
-				localStream = stream
-			}, errBack);
-		} else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
-			navigator.mozGetUserMedia(mediaConfig, function(stream){
-				video.src = window.URL.createObjectURL(stream);
-				video.play();
-				localStream = stream
-			}, errBack);
-		}
+    var video = document.getElementById('video');
+    var mediaConfig =  { video: true };
+    var errBack = function(e) {
+    	//console.log('An error has occurred!', e)
+    };
+    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+			video.srcObject = stream;
+            video.play();
+            localStream = stream
+        });
+    }
+    else if(navigator.getUserMedia) { // Standard
+		navigator.getUserMedia(mediaConfig, function(stream) {
+			video.src = stream;
+			video.play();
+			localStream = stream
+		}, errBack);
+	} else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
+		navigator.webkitGetUserMedia(mediaConfig, function(stream){
+			video.src = window.webkitURL.createObjectURL(stream);
+			video.play();
+			localStream = stream
+		}, errBack);
+	} else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
+		navigator.mozGetUserMedia(mediaConfig, function(stream){
+			video.src = window.URL.createObjectURL(stream);
+			video.play();
+			localStream = stream
+		}, errBack);
+	}
 }
 
 mapCanvas = []
@@ -680,7 +680,8 @@ function selectMap(id){
 
 
 var mapper = false;
-
+var positionIncrement = 1;
+var rotationIncrement = 0.01;
 //
 bMapGui = function(){
 	$('<div/>', {
@@ -693,8 +694,23 @@ bMapGui = function(){
     $('<div/>', { id:'bMapGuiTools'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
     $('<span/>').addClass('glyphicon glyphicon-plus').html("1").click(function(){ mapper=false; selectedCamera = camera;  controls.enabled = false; }).appendTo('#bMapGuiTools');
     $('<span/>').addClass('glyphicon glyphicon-plus').html("2").click(function(){ mapper=false; selectedCamera = cameraOrbital;  controls.enabled = true; }).appendTo('#bMapGuiTools');
-    $('<span/>').addClass('glyphicon glyphicon-plus').html("map").click(function(){ mapper=true; selectedCamera = camera;  controls.enabled = false; ma}).appendTo('#bMapGuiTools');
+    $('<span/>').addClass('glyphicon glyphicon-plus').html("map").click(function(){ mapper=true; selectedCamera = cameraOrth;  controls.enabled = false; }).appendTo('#bMapGuiTools');
+    $('<div/>', { id:'bMapGuiMapBar'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
+    $('<span/>').addClass('posrotcontrol').html("x+").click(function(){ mapObjects.position.x += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');
+    $('<span/>').addClass('posrotcontrol').html("x-").click(function(){ mapObjects.position.x -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');
+    $('<span/>').addClass('posrotcontrol').html("y+").click(function(){ mapObjects.position.y += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar'); 
+    $('<span/>').addClass('posrotcontrol').html("y-").click(function(){ mapObjects.position.y -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');  
+    $('<span/>').addClass('posrotcontrol').html("z+").click(function(){ mapObjects.position.z += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar'); 
+    $('<span/>').addClass('posrotcontrol').html("z-").click(function(){ mapObjects.position.z -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');  
+    $('<div/>', { id:'bMapGuiMapBar2'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
+    $('<span/>').addClass('posrotcontrol').html("x+").click(function(){ mapObjects.rotation.x += rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');
+    $('<span/>').addClass('posrotcontrol').html("x-").click(function(){ mapObjects.rotation.x -= rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');
+    $('<span/>').addClass('posrotcontrol').html("y+").click(function(){ mapObjects.rotation.y += rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2'); 
+    $('<span/>').addClass('posrotcontrol').html("y-").click(function(){ mapObjects.rotation.y -= rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');  
+    $('<span/>').addClass('posrotcontrol').html("z+").click(function(){ mapObjects.rotation.z += rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2'); 
+    $('<span/>').addClass('posrotcontrol').html("z-").click(function(){ mapObjects.rotation.z -= rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');  
     
+
     $('<div/>', { id:'bMapGuiToolBar'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
     $('<span/>').addClass('glyphicon glyphicon-plus').html("+").click(function(){ newMap() }).appendTo('#bMapGuiToolBar');
     $('<span/>').addClass('glyphicon glyphicon-trash').html("-").click(function(){
@@ -740,6 +756,7 @@ bMapGui = function(){
     }).appendTo('body');
     
     $('<div/>', { id:'bLightGuiTitle'}).html('Map Tools').addClass('bLightGuiTitle').appendTo("#bMapGuiProjectorTools")
+    
     $('<div/>').html('position').addClass('bLightGuiTitle ptools bmapscale').click(function(){
     	$('.ptools').removeClass('selectedBmapLayer');
     	$(this).addClass('selectedBmapLayer');
@@ -755,6 +772,7 @@ bMapGui = function(){
     	$(this).addClass('selectedBmapLayer');
     	maps[currentBmap].objControl.setMode( 'scale' );
     }).appendTo("#bMapGuiProjectorTools");
+    
     
     
     $('#bMapGuiProjectorTools').hide();
@@ -943,7 +961,7 @@ bmap = function(){
 		maps[currentBmap].updateProjection();
 	} );
 	this.group.add( this.objControl )
-	scene.add( this.group )
+	mapObjects.add( this.group )
 	//objectChangeEvent
 	
 	this.updateProjection = function(){
@@ -1035,6 +1053,7 @@ bmap = function(){
 		this.mesh.geometry.setDrawRange( 0,  this.editPoints.length);  
 		this.mesh.geometry.computeBoundingSphere();
 		*/
+		//this.updateProjection();
 	}
 	
 	this.purge = function(){
@@ -1053,20 +1072,7 @@ bmap = function(){
 	
 	this.removeFaceByIndex = function(index){
 		//////console.log("REMOVE FACE BY INDEX  : " + index)
-		j = index*9;
-		var positions = this.mesh.geometry.attributes.position.array;
-		positions[ j ] = 0;//px
-		positions[ j + 1 ] = 0;//py;
-		positions[ j + 2 ] = 0;//pz
 		
-		positions[ j + 3 ] = 0;//px
-		positions[ j + 4 ] = 0;//py;
-		positions[ j + 5 ] = 0;//pz
-
-		positions[ j + 6 ] = 0;//px
-		positions[ j + 7 ] = 0;//py;
-		positions[ j + 8 ] = 0;//pz
-
 		j = index*3;
 		this.editPoints[j].visible = false;
 		this.editPoints[j+1].visible = false;
@@ -1076,39 +1082,12 @@ bmap = function(){
 		editPoints.remove(scene.getObjectByName(this.editPoints[j+1].name))
 		this.editPoints.splice(j, 3)
 		
-		/*for(k=(index*9);k<this.MAX_POINTS;k += 9){
-			// delete editPoints j tp j+2
-			
-			if(j + 9 >= this.MAX_POINTS){
-				positions[ k ] = 0;//px
-				positions[ k + 1 ] = 0;//py;
-				positions[ k + 2 ] = 0;//pz
-				
-				positions[ k + 3 ] = 0;//px
-				positions[ k + 4 ] = 0;//py;
-				positions[ k + 5 ] = 0;//pz
+		var positions = this.mesh.geometry.attributes.position.array;
+		for(k=(index*9);k+9<positions.length;k++){
+			positions[ k ] = positions[ k + 9 ];
+		}
+		this.v = this.v-9
 		
-				positions[ k + 6 ] = 0;//px
-				positions[ k + 7 ] = 0;//py;
-				positions[ k + 8 ] = 0;//pz
-			}else{
-				positions[ k ] = positions[ k + 9 ];
-				positions[ k + 1 ] = positions[ k + 1 + 9 ];
-				positions[ k + 2 ] = positions[ k + 2 + 9 ];
-				
-				positions[ k + 3 ] = positions[ k + 3 + 9 ];
-				positions[ k + 4 ] = positions[ k + 4 + 9 ];
-				positions[ k + 5 ] = positions[ k + 5 + 9 ];
-		
-				positions[ k + 6 ] = positions[ k + 6 + 9 ];
-				positions[ k + 7 ] = positions[ k + 7 + 9 ];
-				positions[ k + 8 ] = positions[ k + 8 + 9 ];
-				
-			
-			}
-			this.v = this.v-9; 
-			
-		}*/
 		this.mesh.geometry.attributes.position.needsUpdate = true;   
 		this.mesh.geometry.setDrawRange( 0, parseInt((this.v+1)/3) );  
 		this.mesh.geometry.computeBoundingSphere();
@@ -1121,15 +1100,19 @@ bmap = function(){
 function purgeMapInstance(){
 	maps[currentBmap].purge()
 	maps.splice(currentBmap, 1)
-	
-	 
+}
+
+function updateProjections(){
+	for(j=0;j<maps.length;j++){
+		maps[j].updateProjection();
+	}
 }
 
 	
 /** THREE JS */	
 	
 var container, stats;
-var selectedCamera, camera, cameraOrbital, scene, renderer, controls;
+var selectedCamera, camera, cameraOrth, cameraOrbital, scene, renderer, controls;
 var mouseX = 0, mouseY = 0;
 var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
@@ -1165,6 +1148,10 @@ function initThree() {
 	
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	container.appendChild( renderer.domElement );
+	
+	
+	cameraOrth = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+	
 	
 	camera = new THREE.PerspectiveCamera( 75, width/height, 0.1, 200000 );
 	
@@ -1225,7 +1212,7 @@ var radian = 0.01;
 function onDocumentKeyDown(event) {
     var keyCode = event.which;
     
-    if (keyCode == 87) {
+   /* if (keyCode == 87) {
         camera.position.y += ySpeed;
     } else if (keyCode == 83) {
         camera.position.y -= ySpeed;
@@ -1243,60 +1230,69 @@ function onDocumentKeyDown(event) {
         camera.position.set(0, 0, 0);
     }
     camera.lookAt(new THREE.Vector3(0,0,0));
+    */
 };
 
 
 animate = function () {
 		requestAnimationFrame( animate );
 		if(bufferpoints !== undefined){
-			//if(controls.enabled == true){
-				//cameraOrbital.lookAt(new THREE.Vector3(0,0,0));
 			controls.target.set(0, 0, 0);
 			controls.update();
-			//}
 		}
-		
-		
-		if(isLoaded == true){
-			raycaster.setFromCamera( mouse, selectedCamera );
-			/////console.log(pointclouds )
-		    var canSelectPoint = true
-		    if(currentBmap !== -1){
-				var intersects = raycaster.intersectObject( maps[currentBmap].mesh );
-				if ( intersects.length > 0 ) {
-					var intersect = intersects[ 0 ];
-					var face = intersect.face;
-					if(((intersect.faceIndex * 9) + 9) < maps[currentBmap].v){
-						var linePosition = maps[currentBmap].line.geometry.attributes.position;
-						var meshPosition = maps[currentBmap].mesh.geometry.attributes.position;
-						linePosition.copyAt( 0, meshPosition, face.a );
-						linePosition.copyAt( 1, meshPosition, face.b );
-						linePosition.copyAt( 2, meshPosition, face.c );
-						linePosition.copyAt( 3, meshPosition, face.a );
-						maps[currentBmap].mesh.updateMatrix();
-						maps[currentBmap].line.geometry.applyMatrix( maps[currentBmap].mesh.matrix );
-						maps[currentBmap].line.visible = true;
-						canSelectPoint = false
-					}
-				} else {
-					maps[currentBmap].line.visible = false;
-				}
+		if(selectedCamera == cameraOrth){
+			//cameraOrth.position.copy(camera.position)
+			sphere.visible = false;
+			editPoints.visible = false;
+			for(var j=0; j < maps.length; j++){
+				maps[j].frustumHelper.visible=false
 			}
-			if(canSelectPoint == true){
-				var intersections = raycaster.intersectObjects( pointclouds );
-				intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
-				toggle += clock.getDelta();
-				if (  intersection !== null ) {
-					sphere.position.copy( intersection.point );
-					toggle = 0 ;
-					sphere.visible = true;
+		}else{
+			
+			if(isLoaded == true){
+				for(var j=0; j < maps.length; j++){
+					maps[j].frustumHelper.visible=true
+				}
+				editPoints.visible = true;
+				raycaster.setFromCamera( mouse, selectedCamera );
+			    var canSelectPoint = true
+			    if(currentBmap !== -1){
+					var intersects = raycaster.intersectObject( maps[currentBmap].mesh );
+					if ( intersects.length > 0 ) {
+						var intersect = intersects[ 0 ];
+						var face = intersect.face;
+						if(((intersect.faceIndex * 9) + 9) < maps[currentBmap].v){
+							var linePosition = maps[currentBmap].line.geometry.attributes.position;
+							var meshPosition = maps[currentBmap].mesh.geometry.attributes.position;
+							linePosition.copyAt( 0, meshPosition, face.a );
+							linePosition.copyAt( 1, meshPosition, face.b );
+							linePosition.copyAt( 2, meshPosition, face.c );
+							linePosition.copyAt( 3, meshPosition, face.a );
+							maps[currentBmap].mesh.updateMatrix();
+							maps[currentBmap].line.geometry.applyMatrix( maps[currentBmap].mesh.matrix );
+							maps[currentBmap].line.visible = true;
+							canSelectPoint = false
+						}
+					} else {
+						maps[currentBmap].line.visible = false;
+					}
+				}
+				if(canSelectPoint == true){
+					var intersections = raycaster.intersectObjects( pointclouds );
+					intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
+					toggle += clock.getDelta();
+					if (  intersection !== null ) {
+						sphere.position.copy( intersection.point );
+						toggle = 0 ;
+						sphere.visible = true;
+					}else{
+						sphere.visible = false;
+					}
 				}else{
 					sphere.visible = false;
 				}
-			}else{
-				sphere.visible = false;
+			
 			}
-		
 		}
 		renderer.render( scene, selectedCamera );
 		
@@ -1343,32 +1339,32 @@ function DrawModels(data){
 	cameraOrbital.position.set((width/2), (height/2), (width)); // Set position like this
 	controls.update();
 	
+	cameraOrth.position.set(0, 0, ( width/100 * 100));
+	cameraOrth.lookAt(new THREE.Vector3(0,0,0));
+	
 	//camera.position.set(0, 0, ( width/100 * 90));
 	//camera.lookAt(new THREE.Vector3(0,0,0));
 	camera.copy(loader.parse(data.camera))
 	
-	
 	editPoints = new THREE.Group();
 	mapObjects = new THREE.Group();
-	
 		
 	bufferpoints  = loader.parse( data.pointCloud );
 	
-	
-	pointclouds = [bufferpoints]
+	pointclouds = [bufferpoints];
 	console.log(bufferpoints)
-	scene.add(bufferpoints);
+	mapObjects.add(bufferpoints);
 	
 	scene.add( mapObjects );
 	scene.add( editPoints );
 	for(i=0;i<data.polygons.length;i++){
-		maps.push(new bmap)
+		maps.push(new bmap())
 		currentBmap = maps.length-1
 		maps[currentBmap].loadMap(data.polygons[i], loader.parse(data.frustrums[i]), data.editPoints[i])
 		bMapGUI.addBMap(currentBmap);
 		selectMap(currentBmap);
 	}
-	
+	updateProjections();
 	
 	var sphereGeometry = new THREE.SphereBufferGeometry( 3, 32, 32 );
 	var sphereMaterial = new THREE.MeshBasicMaterial( { color: 0xffff00 } );
@@ -1376,9 +1372,6 @@ function DrawModels(data){
 	sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
 	scene.add( sphere );
 	isLoaded = true;
-	
-	
-	
 }
 
 function createCurvePath(start, end, elevation) {
@@ -1472,6 +1465,10 @@ function drawScene(){
 	
 	camera.lookAt(new THREE.Vector3(0,0,0));
 	
+	cameraOrth.position.set(0, 0, ( width/100 * 90));
+	// find closet data point on xy axis
+	
+	cameraOrth.lookAt(new THREE.Vector3(0,0,0));
 	
 	pointsBufferGeometry = new THREE.BufferGeometry().setFromPoints(points3d);
 	pointsBufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( new Float32Array( points3d.length * 3 ), 3 ) );
@@ -1485,10 +1482,8 @@ function drawScene(){
 	pointsBufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colorz, 3 ) );
 	pointsBufferGeometry.name = "pointsBufferGeometery";
 	
-	
 	pointsGeometry.rotateZ( THREE.Math.degToRad(270) );
 	pointsGeometry.translate(-(width /2), (	height / 2), 0);
-	
 	
 	pointsBufferGeometry.rotateZ( THREE.Math.degToRad(270) );
 	pointsBufferGeometry.translate(-(width /2), (height/2 ), 0);
@@ -1499,7 +1494,6 @@ function drawScene(){
 	bb = pointsBufferGeometry.boundingBox.clone();
 	
 	pointsBufferGeometryMaterial = new THREE.PointsMaterial( { size: pointSize, vertexColors: THREE.VertexColors, side: THREE.DoubleSide } );
-	
 	
 	bufferpoints = new THREE.Points(pointsBufferGeometry, pointsBufferGeometryMaterial );
 	mapObjects.add(bufferpoints);
