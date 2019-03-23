@@ -35,7 +35,6 @@ $(function() {
 	 			$('#helpModal').modal('hide');
 	 		});
 	 		webCamSetup();
-		
 		}
 		if(loadWhat == "images"){
 			if(windowMode == 'FS'){
@@ -692,9 +691,9 @@ bMapGui = function(){
    
     
     $('<div/>', { id:'bMapGuiTools'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
-    $('<span/>').addClass('glyphicon glyphicon-plus').html("1").click(function(){ mapper=false; selectedCamera = camera;  controls.enabled = false; }).appendTo('#bMapGuiTools');
-    $('<span/>').addClass('glyphicon glyphicon-plus').html("2").click(function(){ mapper=false; selectedCamera = cameraOrbital;  controls.enabled = true; }).appendTo('#bMapGuiTools');
-    $('<span/>').addClass('glyphicon glyphicon-plus').html("map").click(function(){ mapper=true; selectedCamera = cameraOrth;  controls.enabled = false; }).appendTo('#bMapGuiTools');
+   // $('<span/>').addClass('glyphicon glyphicon-plus').html("1").click(function(){ mapper=false; selectedCamera = camera;  controls.enabled = false; }).appendTo('#bMapGuiTools');
+    $('<span/>').addClass('glyphicon glyphicon-plus').html("edit").click(function(){ mapper=false; selectedCamera = cameraOrbital;  controls.enabled = true; }).appendTo('#bMapGuiTools');
+    $('<span/>').addClass('glyphicon glyphicon-plus').html("project").click(function(){ mapper=true; selectedCamera = cameraOrth;  controls.enabled = false; }).appendTo('#bMapGuiTools');
     $('<div/>', { id:'bMapGuiMapBar'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
     $('<span/>').addClass('posrotcontrol').html("x+").click(function(){ mapObjects.position.x += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');
     $('<span/>').addClass('posrotcontrol').html("x-").click(function(){ mapObjects.position.x -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');
@@ -803,17 +802,16 @@ function saveScene(){
 	bmapScene.editPoints = []
 	//bmapScene.camera = {}
 	bmapScene.renderMap = {}
-	// layers
-	/*bmapScene.camera.fov
-	bmapScene.camera.lookat = {x:0 ,y:0, z:0}
-	bmapScene.camera.rotation = {x:0 ,y:0, z:0}
-	bmapScene.camera.position = {x:0 ,y:0, z:0}*/
+	bmapScene.renderMap.position = mapObjects.position.clone()
+	bmapScene.renderMap.rotation = mapObjects.rotation.clone()
+	
 	
 	bmapScene.camera = camera.toJSON();
 	
 	
 	bmapScene.pointCloud = bufferpoints.toJSON();
 	for (l=0;l<maps.length;l++){
+		
 		bmapScene.polygons.push(maps[l].mesh.geometry.toJSON());
 		bmapScene.frustrums.push(maps[l].frustumHelper.toJSON());
 		var positions = []
@@ -1160,10 +1158,10 @@ function initThree() {
 	cameraOrbital._name = "orbital"
 	controls = new THREE.OrbitControls( cameraOrbital , renderer.domElement);
 	
-	selectedCamera = camera;
+	selectedCamera = cameraOrbital;
 	
 	//controls.update();
-	controls.enabled = false;
+	controls.enabled = true;
 
 	//scene.add( new THREE.AxesHelper( 20 ) );
 	
@@ -1236,6 +1234,7 @@ function onDocumentKeyDown(event) {
 
 animate = function () {
 		requestAnimationFrame( animate );
+		updateProjections()
 		if(bufferpoints !== undefined){
 			controls.target.set(0, 0, 0);
 			controls.update();
@@ -1251,7 +1250,11 @@ animate = function () {
 			
 			if(isLoaded == true){
 				for(var j=0; j < maps.length; j++){
-					maps[j].frustumHelper.visible=true
+					if(j == currentBmap){
+						maps[j].frustumHelper.visible=true
+					}else{
+						maps[j].frustumHelper.visible=false
+					}
 				}
 				editPoints.visible = true;
 				raycaster.setFromCamera( mouse, selectedCamera );
@@ -1342,9 +1345,7 @@ function DrawModels(data){
 	cameraOrth.position.set(0, 0, ( width/100 * 100));
 	cameraOrth.lookAt(new THREE.Vector3(0,0,0));
 	
-	//camera.position.set(0, 0, ( width/100 * 90));
-	//camera.lookAt(new THREE.Vector3(0,0,0));
-	camera.copy(loader.parse(data.camera))
+	selectedCamera = cameraOrbital
 	
 	editPoints = new THREE.Group();
 	mapObjects = new THREE.Group();
@@ -1352,11 +1353,11 @@ function DrawModels(data){
 	bufferpoints  = loader.parse( data.pointCloud );
 	
 	pointclouds = [bufferpoints];
-	console.log(bufferpoints)
 	mapObjects.add(bufferpoints);
 	
 	scene.add( mapObjects );
 	scene.add( editPoints );
+	
 	for(i=0;i<data.polygons.length;i++){
 		maps.push(new bmap())
 		currentBmap = maps.length-1
@@ -1364,6 +1365,14 @@ function DrawModels(data){
 		bMapGUI.addBMap(currentBmap);
 		selectMap(currentBmap);
 	}
+	
+	mapObjects.rotation.x = data.renderMap.rotation._x;
+	mapObjects.rotation.y = data.renderMap.rotation._y;
+	mapObjects.rotation.z = data.renderMap.rotation._z;
+	mapObjects.position.x = data.renderMap.position.x;
+	mapObjects.position.y = data.renderMap.position.y;
+	mapObjects.position.z = data.renderMap.position.z;
+	
 	updateProjections();
 	
 	var sphereGeometry = new THREE.SphereBufferGeometry( 3, 32, 32 );
