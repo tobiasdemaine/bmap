@@ -1,6 +1,7 @@
 # bmap
+=======
 an artSite plugin tool for creating augmented projection installations in a web browser 
-
+---------
 
 * Display and Capture phase sequence >>  more work on phaze lines and position
 
@@ -11,7 +12,7 @@ an artSite plugin tool for creating augmented projection installations in a web 
 * Map surface 
 	* add map X
 	* add vertex 
-	* elect existing vertex 
+	* select existing vertex 
 	* delete polygon 
 	* select map
 	* delete map
@@ -19,16 +20,9 @@ an artSite plugin tool for creating augmented projection installations in a web 
 
 * pivot world around object on cam 
 
-======
+* save & load from server
+	* mesh and edit points
+	* phase maps
+	* projection position
 
-adjust camera 1 to projection point
-  
-save images == 
-save 3d  
-  
-load from light phase sequence
-load from 3d
-
-
-save buffer vertex 
-load buffer vertex
+* select Fulscreen
