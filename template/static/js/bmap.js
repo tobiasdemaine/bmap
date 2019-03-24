@@ -5,10 +5,6 @@ height = 480;
 inputWidth = width;
 inputHeight = height;
 
-//noiseThreshold = 0.2;
-//zscale = 130;
-//zskew = 24; 
-//renderDetail = 2;
 noiseThreshold = 0.0;
 zscale = 80;
 zskew = 20; 
@@ -57,34 +53,6 @@ $(function() {
 	});
 	
 
-	/*$("#mainNav").hide()
-	if(testAlgo == "Win"){
-		$("#mainNav").show()
-		beginPhasefromDisk()
-		
-	}else if(testAlgo == "FS"){
-		$('.modal-body').html("FULL SCREEN!")
-		$('#helpModal').modal('show');
-		$('#startSetup').click(function(){
-	 		$('#helpModal').modal('show');
-	 		x = toggleFullScreen()
- 			setTimeout(beginPhasefromDisk, 2000);
- 		});
- 	}else{
- 	 	$('#helpModal').modal('show');
-	 	$('#startSetup').click(function(){
-	 		toggleFullScreen()
-	 		$('#startSetup').unbind()
-	 		$('.modal-body').html("ENSURE YOU ARE IN FULL SCREEN!")
-	 		$('#startSetup').click(function(){
-	 			startSetup();
-	 			$('#helpModal').modal('hide');
-	 		});
-	 	})
-		webCamSetup();
-	}
-	//guiSetup();	
-	bLightGui();*/
 });
 
 
@@ -433,7 +401,6 @@ function processMaps(img1, img2, img3){
 	process = matrix(inputHeight,inputWidth,0);
 	colors = matrix(inputHeight,inputWidth,0);
 
-	////console.log(phase, mask, process, colors);
 	phaseWrap(img1, img2, img3);
 	$('#helpModal').modal('hide');
 }
@@ -443,13 +410,9 @@ var toProcess = []
 var process;
 
 function phaseUnwrap(){
-	//console.log('function phaseUnwrap')
 	startY = inputWidth / 2;
     startX = inputHeight / 2;
-    //toProcess = new SinglyList();
     toProcess.push([startX, startY]);
- 	//process[startX][startY] = false
- 	//process = matrix(inputHeight,inputWidth, 0)  
  	
  	
  	while (toProcess.length != 0) {
@@ -677,10 +640,20 @@ function selectMap(id){
 }
 
 
+function orthCamZoomIn(){
+	cameraOrth.zoom += 0.005
+	cameraOrth.updateProjectionMatrix();
+}
+
+function orthCamZoomOut(){
+	cameraOrth.zoom -= 0.005
+	cameraOrth.updateProjectionMatrix();
+}
+
 
 var mapper = false;
 var positionIncrement = 1;
-var rotationIncrement = 0.01;
+var rotationIncrement = 0.005;
 //
 bMapGui = function(){
 	$('<div/>', {
@@ -692,25 +665,54 @@ bMapGui = function(){
     
     $('<div/>', { id:'bMapGuiTools'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
    // $('<span/>').addClass('glyphicon glyphicon-plus').html("1").click(function(){ mapper=false; selectedCamera = camera;  controls.enabled = false; }).appendTo('#bMapGuiTools');
-    $('<span/>').addClass('glyphicon glyphicon-plus').html("edit").click(function(){ mapper=false; selectedCamera = cameraOrbital;  controls.enabled = true; }).appendTo('#bMapGuiTools');
-    $('<span/>').addClass('glyphicon glyphicon-plus').html("project").click(function(){ mapper=true; selectedCamera = cameraOrth;  controls.enabled = false; }).appendTo('#bMapGuiTools');
+    $('<span/>').addClass('glyphicon glyphicon-plus').html("edit").click(function(){ 
+    			mapper=false; 
+		    	selectedCamera = cameraOrbital;  
+		    	controls.enabled = true; 
+		    	mapSetMatrix()
+		    	$('#bMapGuiCamBar').hide(); 
+ 			   	$('#bMapGuiMapBar').hide(); 
+ 			   	$('#bMapGuiMapBar2').hide(); 
+ 			   	$('.editTools').show();
+ 			}).appendTo('#bMapGuiTools');
+    $('<span/>').addClass('glyphicon glyphicon-plus').html("map").click(function(){ 
+    			mapper=true; 
+    			selectedCamera = cameraOrth; 
+    			controls.enabled = false; 
+    			mapSet();
+    			$('#bMapGuiCamBar').show(); 
+    			$('#bMapGuiMapBar').show(); 
+    			$('#bMapGuiMapBar2').show();
+    			$('.editTools').hide();
+    		}).appendTo('#bMapGuiTools');
+    $('<span/>').addClass('glyphicon glyphicon-trash float-right').html("save").click(function(){saveScene()}).appendTo('#bMapGuiTools'); 
+     
+    $('<div/>', { id:'bMapGuiCamBar'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
+    $('<span/>').addClass('posrotcontrol').html("+").click(function(){ orthCamZoomIn(); updateProjections(); }).appendTo('#bMapGuiCamBar');
+    $('<span/>').addClass('posrotcontrol').html("-").click(function(){ orthCamZoomOut(); updateProjections(); }).appendTo('#bMapGuiCamBar');
+    $('#bMapGuiCamBar').hide();
+    
+    
     $('<div/>', { id:'bMapGuiMapBar'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
     $('<span/>').addClass('posrotcontrol').html("x+").click(function(){ mapObjects.position.x += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');
     $('<span/>').addClass('posrotcontrol').html("x-").click(function(){ mapObjects.position.x -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');
     $('<span/>').addClass('posrotcontrol').html("y+").click(function(){ mapObjects.position.y += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar'); 
     $('<span/>').addClass('posrotcontrol').html("y-").click(function(){ mapObjects.position.y -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');  
-    $('<span/>').addClass('posrotcontrol').html("z+").click(function(){ mapObjects.position.z += positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar'); 
-    $('<span/>').addClass('posrotcontrol').html("z-").click(function(){ mapObjects.position.z -= positionIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar');  
+    $('<span/>').addClass('posrotcontrol').html("z+").click(function(){ mapObjects.position.z += positionIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar'); 
+    $('<span/>').addClass('posrotcontrol').html("z-").click(function(){ mapObjects.position.z -= positionIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar');  
+    $('#bMapGuiMapBar').hide();
+   
+   
     $('<div/>', { id:'bMapGuiMapBar2'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
-    $('<span/>').addClass('posrotcontrol').html("x+").click(function(){ mapObjects.rotation.x += rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');
-    $('<span/>').addClass('posrotcontrol').html("x-").click(function(){ mapObjects.rotation.x -= rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');
-    $('<span/>').addClass('posrotcontrol').html("y+").click(function(){ mapObjects.rotation.y += rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2'); 
-    $('<span/>').addClass('posrotcontrol').html("y-").click(function(){ mapObjects.rotation.y -= rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');  
-    $('<span/>').addClass('posrotcontrol').html("z+").click(function(){ mapObjects.rotation.z += rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2'); 
-    $('<span/>').addClass('posrotcontrol').html("z-").click(function(){ mapObjects.rotation.z -= rotationIncrement; updateProjections(); }).appendTo('#bMapGuiMapBar2');  
-    
+    $('<span/>').addClass('posrotcontrol').html("x+").click(function(){ mapObjects.rotation.x += rotationIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar2');
+    $('<span/>').addClass('posrotcontrol').html("x-").click(function(){ mapObjects.rotation.x -= rotationIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar2');
+    $('<span/>').addClass('posrotcontrol').html("y+").click(function(){ mapObjects.rotation.y += rotationIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar2'); 
+    $('<span/>').addClass('posrotcontrol').html("y-").click(function(){ mapObjects.rotation.y -= rotationIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar2');  
+    $('<span/>').addClass('posrotcontrol').html("z+").click(function(){ mapObjects.rotation.z += rotationIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar2'); 
+    $('<span/>').addClass('posrotcontrol').html("z-").click(function(){ mapObjects.rotation.z -= rotationIncrement;  updateProjections(); }).appendTo('#bMapGuiMapBar2');  
+    $('#bMapGuiMapBar2').hide();
 
-    $('<div/>', { id:'bMapGuiToolBar'}).addClass('bMapGuiTitle').appendTo("#bMapGui")
+    $('<div/>', { id:'bMapGuiToolBar'}).addClass('editTools bMapGuiTitle').appendTo("#bMapGui")
     $('<span/>').addClass('glyphicon glyphicon-plus').html("+").click(function(){ newMap() }).appendTo('#bMapGuiToolBar');
     $('<span/>').addClass('glyphicon glyphicon-trash').html("-").click(function(){
     	purgeMapInstance();
@@ -728,13 +730,13 @@ bMapGui = function(){
     	}
     	
     }).appendTo('#bMapGuiToolBar');
-    $('<span/>').addClass('glyphicon glyphicon-trash float-right').html("save").click(function(){saveScene()}).appendTo('#bMapGuiToolBar'); 
+   
     
-    $('<div/>').addClass('bMapGuiTitle selectedBmapLayer').html('Points').click(function(){if(bufferpoints.visible == true){bufferpoints.visible = false; $(this).removeClass('selectedBmapLayer'); }else{bufferpoints.visible=true; $(this).addClass('selectedBmapLayer');} }).appendTo("#bMapGui");
+    $('<div/>').addClass('editTools bMapGuiTitle selectedBmapLayer').html('Points').click(function(){if(bufferpoints.visible == true){bufferpoints.visible = false; $(this).removeClass('selectedBmapLayer'); }else{bufferpoints.visible=true; $(this).addClass('selectedBmapLayer');} }).appendTo("#bMapGui");
     
     this.addBMap = function(){
     	$('.bMapGuiLayer').removeClass('selectedBmapLayer');
-		$('<div/>').addClass('bMapGuiLayer selectedBmapLayer').html('Layer ' + currentBmap).click(function(){ 
+		$('<div/>').addClass('editTools bMapGuiLayer selectedBmapLayer').html('Layer ' + currentBmap).click(function(){ 
 			//console.log($(this).html())
 			//console.log($(this).html().replace("Layer ", ""))
 			
@@ -751,7 +753,7 @@ bMapGui = function(){
 	
 	$('<div/>', {
     	id: 'bMapGuiProjectorTools',
-    	class: 'bMapGuiProjectorTools',
+    	class: 'editTools bMapGuiProjectorTools',
     }).appendTo('body');
     
     $('<div/>', { id:'bLightGuiTitle'}).html('Map Tools').addClass('bLightGuiTitle').appendTo("#bMapGuiProjectorTools")
@@ -806,7 +808,7 @@ function saveScene(){
 	bmapScene.renderMap.rotation = mapObjects.rotation.clone()
 	
 	
-	bmapScene.camera = camera.toJSON();
+	bmapScene.camera = cameraOrth.zoom;
 	
 	
 	bmapScene.pointCloud = bufferpoints.toJSON();
@@ -1148,7 +1150,7 @@ function initThree() {
 	container.appendChild( renderer.domElement );
 	
 	
-	cameraOrth = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 );
+	cameraOrth = new THREE.OrthographicCamera( width / - 2.3, width / 2.3, height / 2.3, height / - 2.3, 1, 1000 );
 	
 	
 	camera = new THREE.PerspectiveCamera( 75, width/height, 0.1, 200000 );
@@ -1160,22 +1162,13 @@ function initThree() {
 	
 	selectedCamera = cameraOrbital;
 	
-	//controls.update();
 	controls.enabled = true;
 
-	//scene.add( new THREE.AxesHelper( 20 ) );
-	
 	raycaster = new THREE.Raycaster();
 	raycaster.params.Points.threshold = threshold;
 	
-	//objControl = new THREE.TransformControls( cameraOrbital, renderer.domElement );
-	//objontrol.addEventListener( 'change', render );
-	
 	container.addEventListener( 'mousemove', onDocumentMouseMove, false );
 	container.addEventListener("click", onThreeClick, false);
-	document.addEventListener("keydown", onDocumentKeyDown, false);
-	
-	
 	
 	animate();
 	
@@ -1207,30 +1200,27 @@ var ySpeed = 1;
 
 var radian = 0.01;
 
-function onDocumentKeyDown(event) {
-    var keyCode = event.which;
-    
-   /* if (keyCode == 87) {
-        camera.position.y += ySpeed;
-    } else if (keyCode == 83) {
-        camera.position.y -= ySpeed;
-    } else if (keyCode == 65) {
-       camera.position.x -= xSpeed;
-    } else if (keyCode == 68) {
-        camera.position.x += xSpeed;
-    } else if (keyCode == 68) {
-        camera.position.x += xSpeed;
-    } else if (keyCode == 90) {
-        camera.position.z -= xSpeed;
-    } else if (keyCode == 88) {
-        camera.position.z += xSpeed;
-    } else if (keyCode == 32) {
-        camera.position.set(0, 0, 0);
-    }
-    camera.lookAt(new THREE.Vector3(0,0,0));
-    */
-};
+var mapRotation = {}
+var mapPosition = {}
 
+function mapSetMatrix(){
+	mapRotation.x = mapObjects.rotation.x
+	mapRotation.y = mapObjects.rotation.y
+	mapRotation.z = mapObjects.rotation.z
+	mapPosition.x = mapObjects.position.x
+	mapPosition.y = mapObjects.position.y
+	mapPosition.z = mapObjects.position.z
+}
+
+
+function mapSet(){
+	mapObjects.rotation.x = mapRotation.x;
+	mapObjects.rotation.y = mapRotation.y;
+	mapObjects.rotation.z = mapRotation.z;
+	mapObjects.position.x = mapPosition.x;
+	mapObjects.position.y = mapPosition.y;
+	mapObjects.position.z = mapPosition.z;
+}
 
 animate = function () {
 		requestAnimationFrame( animate );
@@ -1247,8 +1237,18 @@ animate = function () {
 				maps[j].frustumHelper.visible=false
 			}
 		}else{
-			
 			if(isLoaded == true){
+			
+				
+			
+				mapObjects.rotation.x = 0;
+				mapObjects.rotation.y = 0;
+				mapObjects.rotation.z = 0;
+				mapObjects.position.x = 0;
+				mapObjects.position.y = 0;
+				mapObjects.position.z = 0;
+				
+				
 				for(var j=0; j < maps.length; j++){
 					if(j == currentBmap){
 						maps[j].frustumHelper.visible=true
@@ -1342,8 +1342,14 @@ function DrawModels(data){
 	cameraOrbital.position.set((width/2), (height/2), (width)); // Set position like this
 	controls.update();
 	
-	cameraOrth.position.set(0, 0, ( width/100 * 100));
+	cameraOrth.position.set(0, 0, ( width/1));
 	cameraOrth.lookAt(new THREE.Vector3(0,0,0));
+	
+	
+	cameraOrth.zoom = data.camera
+	cameraOrth.updateProjectionMatrix();
+	
+	//console.log(data.camera)
 	
 	selectedCamera = cameraOrbital
 	
@@ -1358,6 +1364,8 @@ function DrawModels(data){
 	scene.add( mapObjects );
 	scene.add( editPoints );
 	
+	
+	
 	for(i=0;i<data.polygons.length;i++){
 		maps.push(new bmap())
 		currentBmap = maps.length-1
@@ -1366,12 +1374,13 @@ function DrawModels(data){
 		selectMap(currentBmap);
 	}
 	
-	mapObjects.rotation.x = data.renderMap.rotation._x;
-	mapObjects.rotation.y = data.renderMap.rotation._y;
-	mapObjects.rotation.z = data.renderMap.rotation._z;
-	mapObjects.position.x = data.renderMap.position.x;
-	mapObjects.position.y = data.renderMap.position.y;
-	mapObjects.position.z = data.renderMap.position.z;
+	mapRotation.x = data.renderMap.rotation._x;
+	mapRotation.y = data.renderMap.rotation._y;
+	mapRotation.z = data.renderMap.rotation._z;
+	mapPosition.x = data.renderMap.position.x;
+	mapPosition.y = data.renderMap.position.y;
+	mapPosition.z = data.renderMap.position.z;
+	mapSetMatrix();
 	
 	updateProjections();
 	
@@ -1390,11 +1399,9 @@ function createCurvePath(start, end, elevation) {
     var middle3 = globe.translateCordsToPoint(mid.lat(), mid.lon(), elevation);
 
     var curveQuad = new (start3, middle3, end3);
-    //   var curveCubic = new THREE.CubicBezierCurve3(start3, start3_control, end3_control, end3);
-
+  
     var cp = new THREE.CurvePath();
     cp.add(curveQuad);
-    //   cp.add(curveCubic);
     return cp;
 }
 
@@ -1404,7 +1411,6 @@ xDistort = 0
 
 function drawScene(){	
 	var dataPoints = [];
-	//translate(-width / 2, -height / 2);
 	
 	while(scene.children.length > 0){ 
     	scene.remove(scene.children[0]); 
@@ -1417,18 +1423,14 @@ function drawScene(){
 	wpathPoints = wpath.getPoints(width)
 	hpathPoints = hpath.getPoints(height)
 		
-	//console.log(wpath)
 	c=[]
-	//console.log(colors)
 	for (y = 0; y < inputHeight; y += renderDetail) {
 		planephase = 0.5 - (y - (inputHeight / 2)) / zskew;
 		for (x = 0; x < inputWidth; x += renderDetail){
 			
 			if (!mask[y][x]) {
 				if(!colors[y][x]){
-					//console.log(y, x)
 				}
-				////console.log(y, x)
 				var luma = Math.round((colors[y][x][0] + colors[y][x][1] + colors[y][x][2]) * 0.3333);
 				if(luma > 60){
 			    	z = ((phase[y][x] - planephase) * zscale) + (wpathPoints[y].z) 
@@ -1439,7 +1441,6 @@ function drawScene(){
 		}
 	}
 	
-	//dataPoints = trimSoloPoints( dataPoints, 8 )
 	mapObjects = new THREE.Group();
 	
 	pointsGeometry = new THREE.Geometry();
@@ -1465,17 +1466,15 @@ function drawScene(){
 	}
 	
 	
-	cameraOrbital.position.set((width/2), (height/2), (width)); // Set position like this
-	//cameraOrbital.lookAt(new THREE.Vector3(0,0,0));
+	cameraOrbital.position.set((width/2), (height/2), (width)); 
+	
 	controls.update();
 	
 	camera.position.set(0, 0, ( width/100 * 90));
-	// find closet data point on xy axis
 	
 	camera.lookAt(new THREE.Vector3(0,0,0));
 	
 	cameraOrth.position.set(0, 0, ( width/100 * 90));
-	// find closet data point on xy axis
 	
 	cameraOrth.lookAt(new THREE.Vector3(0,0,0));
 	
@@ -1487,7 +1486,6 @@ function drawScene(){
 		pointsBufferGeometry.attributes.color.setXYZ( i, clr.r, clr.g, clr.b );
 	}
 	
-	//pointsBufferGeometry.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
 	pointsBufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colorz, 3 ) );
 	pointsBufferGeometry.name = "pointsBufferGeometery";
 	
@@ -1507,50 +1505,17 @@ function drawScene(){
 	bufferpoints = new THREE.Points(pointsBufferGeometry, pointsBufferGeometryMaterial );
 	mapObjects.add(bufferpoints);
 	
-	/*var box = new THREE.BoxHelper( bufferpoints, 0xffff00 );
-	//box.scale.set( 0.2, 0.2, 0.2 );
-	mapObjects.add( box );
-	*/
-	//var measureStart = new Date().getTime();
-
-	// creating the kdtree takes a lot of time to execute, in turn the nearest neighbour search will be much faster
-	//kdtree = new THREE.TypedArrayUtils.Kdtree( points, distanceFunction, 3 );
-	//var imagePositionsInRange = kdtree.nearest( [ position.x, position.y, position.z ], 100, maxDistance );
-
-	////console.log( 'TIME building kdtree', new Date().getTime() - measureStart );
-	
-	/* skinned */ 
-	/*
-	var indexDelaunay = Delaunator.from(
-	  points3d.map(v => {
-	    return [v.x, v.z];
-	  })
-	);
-	
-	var meshIndex = []; // delaunay index => three.js index
-	for (let i = 0; i < indexDelaunay.triangles.length; i++){
-	  meshIndex.push(indexDelaunay.triangles[i]);
-	}
-	
-	toMeshGeometry = new THREE.BufferGeometry().setFromPoints(points3d);
-	toMeshGeometry.addAttribute( 'color', new THREE.BufferAttribute( new Float32Array( points3d.length * 3 ), 3 ) );
-	var clr = new THREE.Color();
-	for ( var i = 0; i < dataPoints.length; i ++ ) {
-		clr.setRGB( c[i][0], c[i][1], c[i][2]);
-		toMeshGeometry.attributes.color.setXYZ( i, clr.r, clr.g, clr.b );
-	}
-	toMeshGeometry.setIndex(meshIndex); // add three.js index to the existing geometry
-	toMeshGeometry.computeVertexNormals();
-	var mesh = new THREE.Mesh(
-	  toMeshGeometry, 
-	  meshMaterial
-	);
-	//mapObjects.add(mesh);
-	*/
 	pointclouds = [bufferpoints]
 	
+	mapRotation.x = 0;
+	mapRotation.y = 0;
+	mapRotation.z = 0;
+	mapPosition.x = 0;
+	mapPosition.y = 0;
+	mapPosition.z = 0;
+	mapSetMatrix();
 	
-
+	
 	/* MOUSE SPHERE */
 
 	var sphereGeometry = new THREE.SphereBufferGeometry( 3, 32, 32 );
@@ -1566,11 +1531,6 @@ function drawScene(){
 
 }
 isLoaded = false;	
-
-
-
-
-
 
 /* function source */
 function testPointCoordinate(p1, p2, spray){
@@ -1611,117 +1571,11 @@ function trimSoloPoints( dPoints, spray ){
 			newPoints.push(dPoints[i])
 		}
 	}
-	//console.log(x)
 	return newPoints;
 }
-	
-	
-	
-	
-	
-	
-
-/* DATA UTILS */
 
 
-function Node(data) {
-    this.data = data;
-    this.next = null;
-}
- 
-function SinglyList() {
-    this._length = 0;
-    this.head = null;
-}
- 
-SinglyList.prototype.add = function(value) {
-    var node = new Node(value),
-        currentNode = this.head;
- 
-    // 1st use-case: an empty list
-    if (!currentNode) {
-        this.head = node;
-        this._length++;
- 
-        return node;
-    }
- 
-    // 2nd use-case: a non-empty list
-    while (currentNode.next) {
-        currentNode = currentNode.next;
-    }
- 
-    currentNode.next = node;
- 
-    this._length++;
-     
-    return node;
-};
- 
-SinglyList.prototype.searchNodeAt = function(position) {
-    var currentNode = this.head,
-        length = this._length,
-        count = 1,
-        message = {failure: 'Failure: non-existent node in this list.'};
- 
-    // 1st use-case: an invalid position
-    if (length === 0 || position < 1 || position > length) {
-        throw new Error(message.failure);
-    }
- 
-    // 2nd use-case: a valid position
-    while (count < position) {
-        currentNode = currentNode.next;
-        count++;
-    }
- 
-    return currentNode;
-};
- 
-SinglyList.prototype.isEmpty = function() 
-{ 
-    return this._length == 0; 
-} 
- 
-SinglyList.prototype.remove = function(position) {
-    var currentNode = this.head,
-        length = this._length,
-        count = 0,
-        message = {failure: 'Failure: non-existent node in this list.'},
-        beforeNodeToDelete = null,
-        nodeToDelete = null,
-        deletedNode = null;
- 
-    // 1st use-case: an invalid position
-    if (position < 0 || position > length) {
-        throw new Error(message.failure);
-    }
- 
-    // 2nd use-case: the first node is removed
-    if (position === 1) {
-        this.head = currentNode.next;
-        deletedNode = currentNode;
-        currentNode = null;
-        this._length--;
-         
-        return deletedNode;
-    }
- 
-    // 3rd use-case: any other node is removed
-    while (count < position) {
-        beforeNodeToDelete = currentNode;
-        nodeToDelete = currentNode.next;
-        count++;
-    }
- 
-    beforeNodeToDelete.next = nodeToDelete.next;
-    deletedNode = nodeToDelete;
-    nodeToDelete = null;
-    this._length--;
- 
-    return deletedNode;
-};
-	
+
 undef = undefined
 
 
