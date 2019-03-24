@@ -160,7 +160,9 @@ document.addEventListener('keydown', function(e) {
   }
 }, false);
 
-
+window.addEventListener('resize', function(e){
+	onWindowResize();
+})
 
 	
 ww=0; 
@@ -379,18 +381,6 @@ function processMapsFromVideo(){
 }
 
 distortion = 3;
-
-function undistort(imgData){
-	var distorter = FisheyeGl({image: imgData});
-	distorter.run();
-	var dataurl = distorter.getSrc();
-	var img = new Image();
-    img.src = url
-	img.onload = function () { 
-    	ctx.drawImage(img, 0, 0);
-    }
-	return ctx.getImageData(0, 0, width, height);//distortContext.
-}
 
 
 function processMaps(img1, img2, img3){
@@ -1264,7 +1254,7 @@ animate = function () {
 					if ( intersects.length > 0 ) {
 						var intersect = intersects[ 0 ];
 						var face = intersect.face;
-						if(((intersect.faceIndex * 9) + 9) < maps[currentBmap].v){
+						if(((intersect.faceIndex * 9) + 9) <= maps[currentBmap].v){
 							var linePosition = maps[currentBmap].line.geometry.attributes.position;
 							var meshPosition = maps[currentBmap].mesh.geometry.attributes.position;
 							linePosition.copyAt( 0, meshPosition, face.a );

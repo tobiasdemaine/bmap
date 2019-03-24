@@ -1,5 +1,5 @@
 # bmap
-=======
+=
 an artSite plugin tool for creating augmented projection installations in a web browser 
 ---------
 
@@ -26,3 +26,9 @@ an artSite plugin tool for creating augmented projection installations in a web 
 	* projection position
 
 * select Fulscreen
+
+--------
+
+Web Sockets to change content from server or client
+
+object plot from camera 
