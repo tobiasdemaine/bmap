@@ -25,31 +25,21 @@
           <ul class="nav flex-column">
               <li class="nav-item">
                 <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/setup">
-                  <span data-feather="home"></span>
-                  Setup
-                </a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/scene">
-                  <span data-feather="home"></span>
                   Scene
                 </a>
               </li>
               <li class="nav-item">
                 <a class="nav-link {% if tmp.section == 'que' %}active{% endif %}"  href="{{tmp.URL}}/que">
-                  <span data-feather="layers"></span>
-                  Que
+                  Content & Cue
                 </a>
               </li>
 	      <li class="nav-item ">
                 <a class="nav-link {% if tmp.section == 'content' %}active{% endif %}"  href="{{tmp.URL}}/content">
-                  <span data-feather="file-text"></span>
                   My Content
                 </a>
               </li>
 	      <li class="nav-item ">
                 <a class="nav-link "  href="#">
-                  <span data-feather="file-text"></span>
                   {{ tmp.user.email }}
                 </a>
               </li>
@@ -78,63 +68,63 @@
               <div class="btn-group mr-2">
                 <button class="btn btn-sm btn-outline-secondary">New Event</button>
               </div>
-              
             </div>
-           </div>
+        </div>
 		<div id="schedule" class=""></div>
         </main>
     {% endif %}
-	
+	{% if tmp.section == "stream" %}
+		<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
+			<h2>New Stream</H2>
+			<form method="post" action='{{tmp.URL}}/addstream'>
+				<div class="form-group">
+				    <label for="streamurl">Stream URL</label>
+				    <input type="text" class="form-control" id="streamurl" name="url" required value='{{tmp.stream.url}}'>
+				    <input type="hidden" name="id" value="{{tmp.stream.id}}">
+  				</div>
+  				<div class="form-group">
+  					<select class="browser-default custom-select" name="type">
+					  <option value="video" {% if tmp.stream.type == "video" %} selected {% endif %}>VIDEO URL</option>
+					  <option value="rtc" {% if tmp.stream.type == "rtc" %} selected {% endif %}>WEB RTC (WE WEBCAM)</option>
+					</select>
+  				</div>
+  				<button type="submit" class="btn btn-sm">  {% if tmp.stream.id == "" %} Add Stream{% else %} Update Stream {% endif %}</button>
+			</form>
+		</main>
+		{% endif %}
 	{% if tmp.section == "content" %}
 	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
-            <h1 class="h2">My Content</h1>
+            <h1 class="h2">My Library</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">New GLSLShader</button>
-                <button class="btn btn-sm btn-outline-secondary">New Stream</button>
+                <a href="{{tmp.URL}}/shader" class="btn btn-sm btn-outline-secondary">New GLSLShader</a>
+                <a href="{{tmp.URL}}/stream" class="btn btn-sm btn-outline-secondary">New Stream</a>
               </div>
               
             </div>
           </div>
-	 
-         <div class="table-responsive">
-            <table class="table table-striped table-sm">
-              <thead>
-                <tr>
-                  <th>Name</th>
-		  <th>Type</th>
-		  <th>Description</th>
-                  <th>View</th>
-                  <th>Edit</th>
-                  <th>Delete</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1,001 trippy vision</td>
-                  <td>Custom</td>
-		  <td>A geometricinteractive playing field</td>
-		  <td><button class="btn btn-outline-primary btn-sm">View</button></td>
-                  <td><button class="btn btn-outline-success btn-sm">Edit</button></td>
-                  <td><button class="btn btn-outline-danger btn-sm">Delete</button></td>
-                </tr>
-              
-              </tbody>
-            </table>
-          </div>
-          
+	 	  <h3>shaders</h3>	
           <div>
-          New Stream
-          
-          Loop Streams as layers in file
+          <script>
+          function loadShader(img){
+          	hash = $(img).attr('src').replace(".png", "").split('i=')[1];
+          	loc = window.location.href.split("/content")[0]+'/shader#'+hash
+          	document.location.href = loc
+          }
+          </script>
+          {% for shader in tmp.shaders %}
+          		<img src="{{tmp.URL}}/shaderimg?i={{ shader }}" class='shaderImg' onclick="loadShader(this)">
+          {% endfor %}
           </div>
-          
+          <h3>streams</h3>	
           <div>
-          New or edit Stream
-          glsl-sandbox
-          https://github.com/mrdoob/glsl-sandbox
-          
+          {% for stream in tmp.streams %}
+          	<div>
+          		<span class="badge badge-secondary">{{stream.type}}</span> {{stream.url}} <a href="{{tmp.URL}}/stream?s={{stream.id}}" class="badge badge-primary">edit</a> &nbsp; <a href="{{tmp.URL}}/removestream?s={{stream.id}}" class="badge badge-danger">-</a>
+          	</div>
+          {% endfor %}
+          </div>
           </div>
 	 </main>
 	 {% endif %}
