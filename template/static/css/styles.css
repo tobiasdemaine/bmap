@@ -1,5 +1,6 @@
 body {
   font-size: .875rem;
+  background: #111;
 }
 
 .feather {
@@ -333,3 +334,52 @@ body {
 }
 
 
+.surface{
+	width: 200px;
+	height: 130px;
+	border:1px solid black;
+	border-radius : 5px;
+	display:inline-block;
+	margin: 10px;
+	background: #222;
+	padding:10px;
+	color:#ddd;
+	background-size: cover;
+}
+.shaderSelector{
+	width: 200px;
+	height: 130px;
+	border:1px solid black;
+	border-radius : 5px;
+	display:inline-block;
+	margin: 10px;
+	
+}
+
+.cueScreenSelector{
+	width:100%;
+	background-color: #000;
+	margin-right: 5px;
+}
+
+.cueScreenSelector a{
+	margin:5px;
+	margin-top:10px;
+}
+
+#preview{
+    display: block;
+    width: 100%;
+    height: 90%;
+    border: 0;
+    position:absolute;
+    top:45px;
+}
+
+#closeIframe{
+	position:absolute;
+    top:45px;
+    right:10px;
+    z-index: 1001;
+    display:none;
+}

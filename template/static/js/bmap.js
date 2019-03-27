@@ -10,8 +10,26 @@ zscale = 80;
 zskew = 20; 
 renderDetail = 3;
 
+var previewSurfaces;
+var preview = false;
+var theURL;
 
 $(function() {
+	// check hash
+	
+
+  if(window.location.hash) {
+  	  	var hash = window.location.hash.substring(1); //Puts hash in variable, and removes the # character
+      	
+      	theURL = window.location.href.split("#")[0];
+      	
+      	previewSurfaces = JSON.parse(window.atob(hash))
+      	console.log(previewSurfaces)
+      	preview = true;
+		beginModelfromDisk();
+  }else{
+	theURL = window.location.href		
+
 	$('#helpModal').modal('show');
 	$('#startSetup').click(function(){
 		if($("#fullscreen").prop("checked") == true){
@@ -52,7 +70,7 @@ $(function() {
 		
 	});
 	
-
+	}
 });
 
 
@@ -366,7 +384,7 @@ function processMapsFromVideo(){
 	
 	$("#startSetup").unbind();
 	$('#startSetup').click(function(){
-	 		//processMaps();
+	 	//processMaps();
  	});
  	$('#startSetup').hide();
 	 	
@@ -1215,6 +1233,12 @@ function mapSet(){
 animate = function () {
 		requestAnimationFrame( animate );
 		updateProjections()
+		if(preview==true){
+			$("#bMapGui").hide()
+			$("#bMapGuiProjectorTools").hide()
+			$("#bLightGui").hide()
+		}
+		
 		if(bufferpoints !== undefined){
 			controls.target.set(0, 0, 0);
 			controls.update();
@@ -1228,7 +1252,7 @@ animate = function () {
 			}
 		}else{
 			if(isLoaded == true){
-			
+				
 				
 			
 				mapObjects.rotation.x = 0;
@@ -1238,51 +1262,62 @@ animate = function () {
 				mapObjects.position.y = 0;
 				mapObjects.position.z = 0;
 				
-				
-				for(var j=0; j < maps.length; j++){
-					if(j == currentBmap){
-						maps[j].frustumHelper.visible=true
-					}else{
+				if(preview == true){
+					bufferpoints.visible = false;
+					editPoints.visible = false;
+					sphere.visible = false;
+					for(var j=0; j < maps.length; j++){
 						maps[j].frustumHelper.visible=false
+						maps[j].objControl.visible = false
 					}
-				}
-				editPoints.visible = true;
-				raycaster.setFromCamera( mouse, selectedCamera );
-			    var canSelectPoint = true
-			    if(currentBmap !== -1){
-					var intersects = raycaster.intersectObject( maps[currentBmap].mesh );
-					if ( intersects.length > 0 ) {
-						var intersect = intersects[ 0 ];
-						var face = intersect.face;
-						if(((intersect.faceIndex * 9) + 9) <= maps[currentBmap].v){
-							var linePosition = maps[currentBmap].line.geometry.attributes.position;
-							var meshPosition = maps[currentBmap].mesh.geometry.attributes.position;
-							linePosition.copyAt( 0, meshPosition, face.a );
-							linePosition.copyAt( 1, meshPosition, face.b );
-							linePosition.copyAt( 2, meshPosition, face.c );
-							linePosition.copyAt( 3, meshPosition, face.a );
-							maps[currentBmap].mesh.updateMatrix();
-							maps[currentBmap].line.geometry.applyMatrix( maps[currentBmap].mesh.matrix );
-							maps[currentBmap].line.visible = true;
-							canSelectPoint = false
+				}else{
+				
+					for(var j=0; j < maps.length; j++){
+						if(j == currentBmap){
+							maps[j].frustumHelper.visible=true
+						}else{
+							maps[j].frustumHelper.visible=false
 						}
-					} else {
-						maps[currentBmap].line.visible = false;
 					}
-				}
-				if(canSelectPoint == true){
-					var intersections = raycaster.intersectObjects( pointclouds );
-					intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
-					toggle += clock.getDelta();
-					if (  intersection !== null ) {
-						sphere.position.copy( intersection.point );
-						toggle = 0 ;
-						sphere.visible = true;
+					editPoints.visible = true;
+					raycaster.setFromCamera( mouse, selectedCamera );
+				    var canSelectPoint = true
+				    if(currentBmap !== -1){
+						var intersects = raycaster.intersectObject( maps[currentBmap].mesh );
+						if ( intersects.length > 0 ) {
+							var intersect = intersects[ 0 ];
+							var face = intersect.face;
+							if(((intersect.faceIndex * 9) + 9) <= maps[currentBmap].v){
+								var linePosition = maps[currentBmap].line.geometry.attributes.position;
+								var meshPosition = maps[currentBmap].mesh.geometry.attributes.position;
+								linePosition.copyAt( 0, meshPosition, face.a );
+								linePosition.copyAt( 1, meshPosition, face.b );
+								linePosition.copyAt( 2, meshPosition, face.c );
+								linePosition.copyAt( 3, meshPosition, face.a );
+								maps[currentBmap].mesh.updateMatrix();
+								maps[currentBmap].line.geometry.applyMatrix( maps[currentBmap].mesh.matrix );
+								maps[currentBmap].line.visible = true;
+								canSelectPoint = false
+							}
+						} else {
+							maps[currentBmap].line.visible = false;
+						}
+					}
+					if(canSelectPoint == true){
+						var intersections = raycaster.intersectObjects( pointclouds );
+						intersection = ( intersections.length ) > 0 ? intersections[ 0 ] : null;
+						toggle += clock.getDelta();
+						if (  intersection !== null ) {
+							sphere.position.copy( intersection.point );
+							toggle = 0 ;
+							sphere.visible = true;
+						}else{
+							sphere.visible = false;
+						}
 					}else{
 						sphere.visible = false;
 					}
-				}else{
-					sphere.visible = false;
+				
 				}
 			
 			}
@@ -1311,9 +1346,13 @@ function removeEntity(object) {
 var objs = new Array();	
 
 
+
+
 function ModelLoader(){
-	ur = window.location.href.split("/").reverse()
+	console.log("MODELLOADER");
+	ur = theURL.split("/").reverse()
 	url = "/" + ur[2] + "/" + ur[1] + "/getmapdata";
+	console.log(url)
 	$.getJSON( url, function( data ) {
 		console.log(data);
 		DrawModels(data);

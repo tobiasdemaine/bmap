@@ -29,7 +29,7 @@
                 </a>
               </li>
               <li class="nav-item">
-                <a class="nav-link {% if tmp.section == 'que' %}active{% endif %}"  href="{{tmp.URL}}/que">
+                <a class="nav-link {% if tmp.section == 'que' %}active{% endif %}"  href="{{tmp.URL}}/cue">
                   Content & Cue
                 </a>
               </li>
@@ -60,18 +60,86 @@
       <div class="row">
        
   	
-	{% if tmp.section == "que" %}
-	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
+	{% if tmp.section == "cue" %}
+	<div class="cueScreenSelector">
+		{% for surface in tmp.surfaces %}
+			
+			<div class="surface" data-surfaceid="{{surface}}" data-surfacetype="" data-surfacelink="" ondrop="drop(event)" ondragover="allowDrop(event)">
+				surface {{ surface }}
+			</div>
+			
+		{% endfor %}
+		<a href="javascript:preview()" class="btn btn-success float-right">Preview</a>
+		<a href="#" class="btn btn-warning float-right">Set Future</a>
+		<a href="#" class="btn btn-danger float-right">Set Live</a>
+		<a id="boiling" target="_blank"></a>
+	</div>
+	<div>
+		{% for shader in tmp.shaders %}
+        <img src="{{tmp.URL}}/shaderimg?i={{shader}}" id="{{shader}}" data-surfacetype="shader" class='shaderSelector' draggable="true" ondragstart="drag(this, event)">
+        {% endfor %}
+    </div>
+    <a href="javascript:destroyIframe();" id="closeIframe" class="btn btn-danger">Close</a>
+    <script>
+    
+    function destroyIframe(){
+    	$("#preview").remove();
+    	$("#closeIframe").fadeOut();
+    }
+    
+    function preview(){
+    
+    	surfaces = []
+    	$(".surface").each(function(){
+    		x = {}
+    		x.surfaceLink = $(this).attr('data-surfacelink');
+    		x.surfaceType = $(this).attr('data-surfacetype');
+    		surfaces.push(x);
+    	});
+    	jstring = JSON.stringify(surfaces);
+    	hash =  window.btoa(jstring)
+    	loc = window.location.href.split("/cue")[0]+'/setup#'+hash
+    	$('<iframe>', {
+   		src: loc,
+   		id:  'preview',
+   		frameborder: 0,
+   		scrolling: 'no'
+   		}).appendTo('body');
+    	$("#closeIframe").fadeIn();
+    }
+    
+    
+    function allowDrop(ev) {
+	  ev.preventDefault();
+	}
+	
+	function drag(item, ev) {
+		console.log(item, ev)
+	    ev.dataTransfer.setData("text", ev.target.id);
+	}
+	
+	function drop(ev) {
+	  ev.preventDefault();
+	  var data = ev.dataTransfer.getData("text");
+	  $(ev.target).attr('data-surfacetype', $(data).attr('data-surfacetype'));
+	  $(ev.target).attr('data-surfacelink', document.getElementById(data).src.replace('.png', '.json'));
+	  $(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
+	}
+    	
+    </script>
+    
+	  <!--<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
+	  
             <h1 class="h2">The Que</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
               <div class="btn-group mr-2">
                 <button class="btn btn-sm btn-outline-secondary">New Event</button>
               </div>
             </div>
-        </div>
-		<div id="schedule" class=""></div>
-        </main>
+      </div>
+	  <div id="schedule" class=""></div>
+      </main>-->
     {% endif %}
 	{% if tmp.section == "stream" %}
 		<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">

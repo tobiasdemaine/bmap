@@ -147,13 +147,43 @@ def render(artwork, user, path):
 					
 				templateData['shaders'] = shaders
 				templateData['streams'] = streams
+			if path == 'cue':
+				print("x")
+				templateData['section'] = 'cue'
+				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maps"
+				fileNamePath = directory + "/bmap.json"
+				with open(fileNamePath) as file_:
+					data = file_.read()
+				jdata = json.loads(data)
+				surfaces = []
+				count = 0
+				for polygon in jdata['polygons']:
+					surfaces.append(count)
+					count = count + 1
+				
+				templateData['surfaces'] = surfaces
+				
+				shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders/"
+				shaders = []
+				if os.path.exists(shaderDir) == True:
+					listOfFiles = os.listdir(shaderDir)
+					pattern = "*.png"  
+					for entry in listOfFiles:
+						if fnmatch.fnmatch(entry, pattern):
+							print (entry)
+							shaders.append(entry)
+				
+				templateData['shaders'] = shaders
+				
 		else:
-			templateData['section'] = 'que'
+			
 		
+			templateData['section'] = 'cue'
+			
 		
 		
 		if current_user.is_authenticated == True:
-			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maptemp"
+			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maps"
 			if templateData['section'] == "getmapdata":
 			 	fileNamePath = directory + "/bmap.json"
 			 	with open(fileNamePath) as file_:
@@ -193,7 +223,7 @@ def render(artwork, user, path):
 				dir_path = os.path.dirname(path)
 				templateData['alerts'] = render_template_string("""{% extends "alerts.html" %}""")			
 				with open(dir_path +'/template/' + currentTemplate) as file_:
-			    		template = jinja2.Template(file_.read())
+					template = jinja2.Template(file_.read())
 				
 				out = template.render(tmp=templateData)
 				return out			
