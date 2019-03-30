@@ -71,7 +71,7 @@
 		{% endfor %}
 		<a href="javascript:preview()" class="btn btn-success float-right">Preview</a>
 		<a href="#" class="btn btn-warning float-right">Set Future</a>
-		<a href="#" class="btn btn-danger float-right">Set Live</a>
+		<a href="javascript:setLive()" class="btn btn-danger float-right">Set Live</a>
 		<a id="boiling" target="_blank"></a>
 	</div>
 	<div>
@@ -86,6 +86,25 @@
     	$("#preview").remove();
     	$("#closeIframe").fadeOut();
     }
+    
+    function setLive(){
+    	surfaces = []
+    	$(".surface").each(function(){
+    		x = {}
+    		x.surfaceLink = $(this).attr('data-surfacelink');
+    		x.surfaceType = $(this).attr('data-surfacetype');
+    		surfaces.push(x);
+    	});
+		jstring = JSON.stringify(surfaces);
+    	hash =  window.btoa(jstring);
+    	data = {};
+		data.json = jstring;
+		console.log(data);
+		$.post( "./livesurfaces", data ).done(function( data ) {
+			alert(data);
+		});
+    }
+    
     
     function preview(){
     

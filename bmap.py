@@ -174,7 +174,29 @@ def render(artwork, user, path):
 							shaders.append(entry)
 				
 				templateData['shaders'] = shaders
+			if path == 'livesurfaces':
+				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(user.id) + "/bmap/live"
+				if os.path.exists(directory):
+					shutil.rmtree(directory)
+				os.makedirs(directory)
 				
+				fileNamePath = directory + "/live.json"
+				data = request.form.get("json")
+				file = open(fileNamePath, 'w') 
+				file.write(data) 
+				file.close() 
+				return "Done"
+				
+			if path == 'islive':
+				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(user.id) + "/bmap/live"
+				fileNamePath = directory + "/live.json"
+				if os.path.exists(fileNamePath) == True:
+					f = open(fileNamePath , "r")
+					rdata = f.read()
+				else:
+					rdata = 'none'
+					
+				return rdata
 		else:
 			
 		

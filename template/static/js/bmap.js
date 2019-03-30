@@ -12,7 +12,10 @@ renderDetail = 3;
 
 var previewSurfaces;
 var preview = false;
+var live = false;
 var theURL;
+
+
 
 $(function() {
 	// check hash
@@ -67,7 +70,11 @@ $(function() {
 				beginModelfromDisk();
 			}
 		}
-		
+		if(loadWhat == "live"){
+			$('#helpModal').modal('hide');
+			live = true;
+			beginModelfromDisk();
+		}
 	});
 	
 	}
@@ -982,9 +989,13 @@ bmap = function(){
 	this.editPoints = []
 	
 	this.focus = function(){
+		this.objControl.attach(this.frustumHelper)
 		this.objControl.setMode( 'translate' );
 		this.frustumHelper.visible = true;
 		this.objControl.visible = true;
+		this.showX = true;
+		this.showY = true;
+		this.showZ = true;
 		this.objControl.enable = true;
 		
 		for(j=0;j<this.editPoints.length;j++){
@@ -995,9 +1006,12 @@ bmap = function(){
 	this.unfocus = function(){
 		
 		this.frustumHelper.visible = false;
+		this.objControl.detach()
 		this.objControl.visible = false;
 		this.objControl.enable = false;
-		
+		this.showX = false;
+		this.showY = false;
+		this.showZ = false;
 		for(j=0;j<this.editPoints.length;j++){
 			this.editPoints[j].visible = false;
 		}
@@ -1142,7 +1156,6 @@ bmap = function(){
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.Color( 0xff0000 );
 		this.plane = new THREE.PlaneBufferGeometry( width, height );
-		console.log(this.plane)
 		
 		
 		this.planeMaterial = new THREE.MeshBasicMaterial({color:0x7074FF})
@@ -1157,24 +1170,15 @@ bmap = function(){
 		this.ProjectionMaterial.uniforms.texture.value = this.rtTexture.texture
 		this.ProjectionMaterial.needsUpdate = true
 	}
-	this.oncer = 0;
 	this.renderShaderToTextureAnimate = function(){
-		this.uniforms.mouse.x = mouseX
-		this.uniforms.mouse.y = mouseY
+		this.uniforms.mouse.value.x = mouse.x
+		this.uniforms.mouse.value.y = mouse.y
 		var elapsedMilliseconds = Date.now() - this.startTime;
 		var elapsedSeconds = elapsedMilliseconds / 1000.;
 		this.uniforms.time.value = elapsedSeconds;
 		renderer.context.getExtension('OES_standard_derivatives');
 		renderer.render( this.scene, this.cameraRTT, this.rtTexture );
-		
-		
-		
-		
 		this.texture = this.rtTexture
-		if(this.oncer != 1){
-			this.oncer ++;
-			console.log(this.rtTexture)
-		}
 		this.rtTexture.needsUpdate = true
 		
 	}
@@ -1321,22 +1325,38 @@ animate = function () {
 			}
 		}
 		
+		if(live==true){
+			$("#bMapGui").hide()
+			$("#bMapGuiProjectorTools").hide()
+			$("#bLightGui").hide()
+			for(a=0;a<maps.length;a++){
+				if(typeof(maps[a].rtTexture) != "undefined" ){	
+					maps[a].renderShaderToTextureAnimate()
+					maps[a].unfocus()
+					
+				}
+			}
+		}
+		
 		if(bufferpoints !== undefined){
 			controls.target.set(0, 0, 0);
 			controls.update();
 		}
 		if(selectedCamera == cameraOrth){
-			//cameraOrth.position.copy(camera.position)
 			sphere.visible = false;
 			editPoints.visible = false;
 			for(var j=0; j < maps.length; j++){
 				maps[j].frustumHelper.visible=false
 			}
+			if(live == true){
+				bufferpoints.visible = false;
+				for(var j=0; j < maps.length; j++){
+						maps[j].frustumHelper.visible=false
+						maps[j].objControl.visible = false
+				}
+			}
 		}else{
 			if(isLoaded == true){
-				
-				
-			
 				mapObjects.rotation.x = 0;
 				mapObjects.rotation.y = 0;
 				mapObjects.rotation.z = 0;
@@ -1435,7 +1455,6 @@ function surfacesLoad(){
 	if(previewSurfaces[previewSurfaceID].surfaceType == "shader"){
 		url = _url + "loadshader?h=" + url;
 	}
-	console.log(url);
 	$.getJSON( url, function( data ) {
 		previewSurfaces[previewSurfaceID].code = data.code;
 		previewSurfaceID++
@@ -1454,15 +1473,24 @@ function surfacesToMaterial(){
 	}
 }
 
+function loadLiveSurfaces(){
+	ur = theURL.split("/").reverse()
+	_url = "/" + ur[2] + "/" + ur[1] + "/";
+	url = _url + "islive";
+	$.getJSON( url, function( data ) {
+		previewSurfaceID = 0
+		previewSurfaces = data;
+		surfacesLoad()
+	});
+}
+
 
 function ModelLoader(){
 	console.log("MODELLOADER");
 	
 	ur = theURL.split("/").reverse()
 	url = "/" + ur[2] + "/" + ur[1] + "/getmapdata";
-	console.log(url)
 	$.getJSON( url, function( data ) {
-		console.log(data);
 		DrawModels(data);
 	});
 	
@@ -1502,8 +1530,6 @@ function DrawModels(data){
 	scene.add( mapObjects );
 	scene.add( editPoints );
 	
-	
-	
 	for(i=0;i<data.polygons.length;i++){
 		maps.push(new bmap())
 		currentBmap = maps.length-1
@@ -1511,13 +1537,14 @@ function DrawModels(data){
 		bMapGUI.addBMap(currentBmap);
 		selectMap(currentBmap);
 	}
-	
+	console.log(data.renderMap)
 	mapRotation.x = data.renderMap.rotation._x;
 	mapRotation.y = data.renderMap.rotation._y;
 	mapRotation.z = data.renderMap.rotation._z;
 	mapPosition.x = data.renderMap.position.x;
 	mapPosition.y = data.renderMap.position.y;
 	mapPosition.z = data.renderMap.position.z;
+	mapSet();
 	mapSetMatrix();
 	
 	updateProjections();
@@ -1529,10 +1556,16 @@ function DrawModels(data){
 	scene.add( sphere );
 	isLoaded = true;
 	
-	if(previewSurfaces.length > 0){
-		previewSurfaceID = 0
-		surfacesLoad();
-	}	
+	if(typeof(previewSurfaces) != 'undefined'){
+		if(previewSurfaces.length > 0){
+			previewSurfaceID = 0
+			surfacesLoad();
+		}	
+	}
+	if( live == true ){
+		loadLiveSurfaces()
+		selectedCamera = cameraOrth
+	}
 }
 
 function createCurvePath(start, end, elevation) {
