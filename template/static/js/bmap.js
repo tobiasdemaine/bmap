@@ -1101,6 +1101,83 @@ bmap = function(){
 		this.mesh.geometry.computeBoundingSphere();
 	}
 	
+	this.renderShaderToTextureSetup = function(fragmentCode){
+		this.fragmentCode = fragmentCode;
+		this.shaderWidth = width;
+		this.shaderHeight = height;
+		
+		this.cameraRTT = new THREE.OrthographicCamera(this.shaderWidth / - 2, this.shaderWidth / 2, this.shaderHeight / 2, this.shaderHeight / - 2, - 10000, 10000 );
+		//this.cameraRTT.position.z = 100;
+		this.rtTexture = new THREE.WebGLRenderTarget( this.shaderWidth, this.shaderHeight, { minFilter: THREE.LinearFilter, magFilter: THREE.NearestFilter, format: THREE.RGBFormat } );
+		
+		this.vertexCode = document.getElementById( 'surfaceVertexShader' ).textContent;
+		this.uniforms = { 
+			surfaceSize : { type: "v2", value : new THREE.Vector2() }, 
+			resolution: { type: "v2", value: new THREE.Vector2() },      // canvas size (width,height)
+    		time: { value: 1.0 },
+    		backbuffer: { value: 0 },                            // time in seconds since load
+    		mouse: { type: "v2", value: new THREE.Vector2() }            // mouse position in screen pixels
+		}
+		
+		this.uniforms.surfaceSize.value.x = this.shaderWidth;
+		this.uniforms.surfaceSize.value.y = this.shaderHeight;
+		this.uniforms.resolution.value.x = this.shaderWidth;
+		this.uniforms.resolution.value.y = this.shaderHeight;
+		
+		this.xshaderMaterial = new THREE.ShaderMaterial( {
+			uniforms: this.uniforms,
+			vertexShader: this.vertexCode,
+			fragmentShader: this.fragmentCode,
+			wireframe:false
+		} );
+		
+		this.startTime = Date.now();
+		
+		//this.xshaderMaterial.extensions.derivatives = true;
+		//this.xshaderMaterial.extensions.fragDepth = true;
+		//this.xshaderMaterial.extensions.drawBuffers = true;
+		//this.xshaderMaterial.extensions.shaderTextureLOD = true;
+		
+		
+		this.scene = new THREE.Scene();
+		this.scene.background = new THREE.Color( 0xff0000 );
+		this.plane = new THREE.PlaneBufferGeometry( width, height );
+		console.log(this.plane)
+		
+		
+		this.planeMaterial = new THREE.MeshBasicMaterial({color:0x7074FF})
+		this.quad = new THREE.Mesh( this.plane, this.xshaderMaterial); //this.planeMaterial );
+		
+		//this.quad.position.z = -100;
+		//this.plane.computeVertexNormals();
+		this.scene.add( this.quad );
+		
+		// scene.add( this.quad );
+		// attach the rt to original material
+		this.ProjectionMaterial.uniforms.texture.value = this.rtTexture.texture
+		this.ProjectionMaterial.needsUpdate = true
+	}
+	this.oncer = 0;
+	this.renderShaderToTextureAnimate = function(){
+		this.uniforms.mouse.x = mouseX
+		this.uniforms.mouse.y = mouseY
+		var elapsedMilliseconds = Date.now() - this.startTime;
+		var elapsedSeconds = elapsedMilliseconds / 1000.;
+		this.uniforms.time.value = elapsedSeconds;
+		renderer.context.getExtension('OES_standard_derivatives');
+		renderer.render( this.scene, this.cameraRTT, this.rtTexture );
+		
+		
+		
+		
+		this.texture = this.rtTexture
+		if(this.oncer != 1){
+			this.oncer ++;
+			console.log(this.rtTexture)
+		}
+		this.rtTexture.needsUpdate = true
+		
+	}
 	return this;
 }
 
@@ -1237,6 +1314,11 @@ animate = function () {
 			$("#bMapGui").hide()
 			$("#bMapGuiProjectorTools").hide()
 			$("#bLightGui").hide()
+			for(a=0;a<maps.length;a++){
+				if(typeof(maps[a].rtTexture) != "undefined" ){	
+					maps[a].renderShaderToTextureAnimate()
+				}
+			}
 		}
 		
 		if(bufferpoints !== undefined){
@@ -1345,11 +1427,37 @@ function removeEntity(object) {
 
 var objs = new Array();	
 
+var previewSurfaceID = 0
+function surfacesLoad(){
+	ur = theURL.split("/").reverse()
+	_url = "/" + ur[2] + "/" + ur[1] + "/";
+	url = previewSurfaces[previewSurfaceID].surfaceLink
+	if(previewSurfaces[previewSurfaceID].surfaceType == "shader"){
+		url = _url + "loadshader?h=" + url;
+	}
+	console.log(url);
+	$.getJSON( url, function( data ) {
+		previewSurfaces[previewSurfaceID].code = data.code;
+		previewSurfaceID++
+		if(previewSurfaceID != previewSurfaces.length){
+			surfacesLoad();
+		}else{
+			surfacesToMaterial();
+		}
+	});
+}
 
+
+function surfacesToMaterial(){
+	for(a=0;a<maps.length;a++){
+		maps[a].renderShaderToTextureSetup(previewSurfaces[a].code)
+	}
+}
 
 
 function ModelLoader(){
 	console.log("MODELLOADER");
+	
 	ur = theURL.split("/").reverse()
 	url = "/" + ur[2] + "/" + ur[1] + "/getmapdata";
 	console.log(url)
@@ -1357,6 +1465,7 @@ function ModelLoader(){
 		console.log(data);
 		DrawModels(data);
 	});
+	
 }
 
 function DrawModels(data){
@@ -1419,6 +1528,11 @@ function DrawModels(data){
 	sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
 	scene.add( sphere );
 	isLoaded = true;
+	
+	if(previewSurfaces.length > 0){
+		previewSurfaceID = 0
+		surfacesLoad();
+	}	
 }
 
 function createCurvePath(start, end, elevation) {

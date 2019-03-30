@@ -96,15 +96,18 @@
     		x.surfaceType = $(this).attr('data-surfacetype');
     		surfaces.push(x);
     	});
+    	
     	jstring = JSON.stringify(surfaces);
     	hash =  window.btoa(jstring)
     	loc = window.location.href.split("/cue")[0]+'/setup#'+hash
+    	
     	$('<iframe>', {
-   		src: loc,
-   		id:  'preview',
-   		frameborder: 0,
-   		scrolling: 'no'
+   			src: loc,
+   			id:  'preview',
+   			frameborder: 0,
+   			scrolling: 'no'
    		}).appendTo('body');
+    	
     	$("#closeIframe").fadeIn();
     }
     
@@ -121,8 +124,8 @@
 	function drop(ev) {
 	  ev.preventDefault();
 	  var data = ev.dataTransfer.getData("text");
-	  $(ev.target).attr('data-surfacetype', $(data).attr('data-surfacetype'));
-	  $(ev.target).attr('data-surfacelink', document.getElementById(data).src.replace('.png', '.json'));
+	  $(ev.target).attr('data-surfacetype', document.getElementById(data).dataset.surfacetype);
+	  $(ev.target).attr('data-surfacelink', data.replace('.png', ''));
 	  $(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
 	}
     	

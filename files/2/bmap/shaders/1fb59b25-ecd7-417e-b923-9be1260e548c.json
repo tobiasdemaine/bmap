@@ -5,6 +5,8 @@
 #ifdef GL_ES
 precision mediump float;
 #endif
+//varying vec2 fragCoord;
+//varying vec2 vUv;
 
 // glslsandbox uniforms
 uniform float time;

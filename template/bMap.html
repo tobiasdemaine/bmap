@@ -59,6 +59,23 @@
 		
 		<script src="/assets/{{tmp.artwork.id}}/js/bmap.js"></script>
 	
+		<script id="surfaceVertexShader" type="x-shader/x-vertex">
+
+			//attribute vec3 position;
+			//varying vec2 fragCoord;
+    		//varying vec2 vUv; 
+    		
+    		
+			
+			void main() {
+				//vUv = uv;
+		        gl_Position = vec4(position, 1.0 );
+		        //fragCoord = position.xy;
+
+			}
+
+
+		</script>
 	</body>
 </html>
 
