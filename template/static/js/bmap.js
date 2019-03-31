@@ -1472,15 +1472,20 @@ function surfacesToMaterial(){
 		maps[a].renderShaderToTextureSetup(previewSurfaces[a].code)
 	}
 }
-
+lastdata = ""
 function loadLiveSurfaces(){
 	ur = theURL.split("/").reverse()
 	_url = "/" + ur[2] + "/" + ur[1] + "/";
 	url = _url + "islive";
 	$.getJSON( url, function( data ) {
-		previewSurfaceID = 0
-		previewSurfaces = data;
-		surfacesLoad()
+		if(lastdata != JSON.stringify(data)){
+			lastdata = JSON.stringify(data);
+			previewSurfaceID = 0
+			previewSurfaces = data;
+			surfacesLoad()
+		// set tieoiut
+		}
+		setTimeout(loadLiveSurfaces, 1000);
 	});
 }
 
@@ -1565,6 +1570,7 @@ function DrawModels(data){
 	if( live == true ){
 		loadLiveSurfaces()
 		selectedCamera = cameraOrth
+		
 	}
 }
 
