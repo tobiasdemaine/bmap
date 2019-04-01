@@ -16,23 +16,28 @@
   <body>
   
   
-    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0" id="mainNav">
-      <div class="navbar-brand col-sm-3 col-md-2 mr-0 dropdown nopadding">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          {{ tmp.artwork.name }}
-        </a>
-        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+    <nav class="navbar navbar-dark sticky-top bg-dark  p-0" id="mainNav">
+       <div class="text-nowrap" >
+        <a class="p-3" href="{{tmp.URL}}/cue">
+          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %}
+
+        
+       <!--  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <ul class="nav flex-column">
+          	  {% if(tmp.user.permission == "Admin") %}
               <li class="nav-item">
                 <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/setup">
                   Scene
                 </a>
               </li>
+              {% endif %}
+              {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
               <li class="nav-item">
                 <a class="nav-link {% if tmp.section == 'que' %}active{% endif %}"  href="{{tmp.URL}}/cue">
                   Content & Cue
                 </a>
               </li>
+              {% endif %}
 	      <li class="nav-item ">
                 <a class="nav-link {% if tmp.section == 'content' %}active{% endif %}"  href="{{tmp.URL}}/content">
                   My Content
@@ -43,16 +48,14 @@
                   {{ tmp.user.email }}
                 </a>
               </li>
-            </ul>
-        </div>
+            </ul> -->
+        
       </div>
 
-      <a class="navbar-nav col-md-6" href="#"></a>
-      <ul class="navbar-nav px-3">
-        <li class="nav-item text-nowrap">
-          <a class="nav-link" href="/user/sign-out">Sign Out</a>
-        </li>
-      </ul>
+        <div class="nav-item text-nowrap">
+          <a href="/user/edit_user_profile">{{ tmp.user.email }}</a> &nbsp;
+          <a class="p-3" href="/user/sign-out">Sign Out</a>
+        </div>
     </nav>
 
 	
@@ -70,14 +73,28 @@
 			
 		{% endfor %}
 		<a href="javascript:preview()" class="btn btn-success float-right">Preview</a>
+		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
 		<a href="#" class="btn btn-warning float-right">Set Future</a>
-		<a href="javascript:setLive()" class="btn btn-danger float-right">Set Live</a>
-		<a id="boiling" target="_blank"></a>
+		{% endif %}
+		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
+		 <a href="javascript:setLive()" class="btn btn-danger float-right">Set Live</a>
+		 {% endif %}
 	</div>
-	<div>
-		{% for shader in tmp.shaders %}
-        <img src="{{tmp.URL}}/shaderimg?i={{shader}}" id="{{shader}}" data-surfacetype="shader" class='shaderSelector' draggable="true" ondragstart="drag(this, event)">
+	<div><div class="p-3"><span class="shaderTitle">My Shaders</span>
+		<a href="{{tmp.URL}}/shader" class="btn btn-sm btn-outline-secondary float-right ml-1">New GLSLShader</a>
+        <!-- <a href="{{tmp.URL}}/stream" class="btn btn-sm btn-outline-secondary float-right">New Stream</a> -->
+        </div>
+		<div class="scrolling-wrapper" >
+		{% for shader in tmp.myshaders %}
+        <img src="{{tmp.URL}}/shaderimg?i={{shader}}" id="{{shader}}" data-surfacetype="shader" class='shaderSelector _card' draggable="true" ondragstart="drag(this, event)" onmouseup="loadShader(this)">
         {% endfor %}
+		</div>
+		<div class="p-3"><span class="shaderTitle">Other Shaders</span></div>
+		<div class="scrolling-wrapper">
+		{% for shader in tmp.shaders %}
+        <img src="{{tmp.URL}}/shaderimg?i={{shader}}" id="{{shader}}" data-surfacetype="shader" class='shaderSelector _card' draggable="true" ondragstart="drag(this, event)" >
+        {% endfor %}
+        </div>
     </div>
     <a href="javascript:destroyIframe();" id="closeIframe" class="btn btn-danger">Close</a>
     <script>
@@ -147,20 +164,27 @@
 	  $(ev.target).attr('data-surfacelink', data.replace('.png', ''));
 	  $(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
 	}
+	
+	function loadShader(img){
+          	hash = $(img).attr('src').replace(".png", "").split('i=')[1];
+          	loc = window.location.href.split("/cue")[0]+'/shader#'+hash
+          	document.location.href = loc
+          }
     	
     </script>
     
-	  <!--<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
-	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
+	  <!-- 
 	  
-            <h1 class="h2">The Que</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-              <div class="btn-group mr-2">
-                <button class="btn btn-sm btn-outline-secondary">New Event</button>
-              </div>
-            </div>
-      </div>
-	  <div id="schedule" class=""></div>
+	  <h3>streams</h3>	
+          <div>
+          {% for stream in tmp.streams %}
+          	<div>
+          		<span class="badge badge-secondary">{{stream.type}}</span> {{stream.url}} <a href="{{tmp.URL}}/stream?s={{stream.id}}" class="badge badge-primary">edit</a> &nbsp; <a href="{{tmp.URL}}/removestream?s={{stream.id}}" class="badge badge-danger">-</a>
+          	</div>
+          {% endfor %}
+          </div>
+          
+          
       </main>-->
     {% endif %}
 	{% if tmp.section == "stream" %}

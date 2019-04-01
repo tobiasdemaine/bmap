@@ -20,192 +20,229 @@ def render(artwork, user, path):
 		Error = []
 		return out	
 	else:
-		templateData = {}
-		templateData['artwork'] = artwork
-		templateData['user'] = user
-		templateData['URL'] = "/a/" + str(artwork.id)
-		session["path"] = templateData['URL']
-		if path != None:		
-			templateData['section'] = path
-			if path == 'setup':
-				currentTemplate = "bMap.html"
-			if path == 'removestream':
-				streamID = request.args.get('s')
-				streamFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/streams/"+str(streamID)+".json";
-				if os.path.exists(streamFile) == True:
-					os.remove(streamFile)
-				return redirect("/a/" + str(artwork.id) + '/content')
-			
-			if path == 'stream':
-				streamID = request.args.get('s')
-				streamFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/streams/"+str(streamID)+".json";
-				if os.path.exists(streamFile) == True:
-					print("x")
-					f = open(streamFile , "r")
-					x= f.read()
-					e = json.loads(x)
-				else:
-					e = {}
-					e["url"] = ""
-					e["type"] = ""
-					e["id"] = ""
-				templateData['stream'] = e	
-				currentTemplate = "template.html"
+		if current_user.is_authenticated == True:
+			templateData = {}
+			templateData['artwork'] = artwork
+			templateData['user'] = user
+			templateData['URL'] = "/a/" + str(artwork.id)
+			session["path"] = templateData['URL']
+			if path != None:		
+				templateData['section'] = path
+				if path == 'setup':
+					currentTemplate = "bMap.html"
+				if path == 'removestream':
+					streamID = request.args.get('s')
+					streamFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/streams/"+str(streamID)+".json";
+					if os.path.exists(streamFile) == True:
+						os.remove(streamFile)
+					return redirect("/a/" + str(artwork.id) + '/content')
 				
-			if path == 'addstream':
-				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+ str(user.id)	+"/bmap/streams"
-				if not os.path.exists(directory):
-					os.makedirs(directory)
-				print(request.form['url'])
-				rdata = {}
-				rdata["url"] = request.form['url']
-				rdata["type"] = request.form['type']
-				if(request.form['id'] == ''):
-					shaderID = str(uuid.uuid4())
-				else:
-					shaderID = request.form['id']
-				rdata["id"] = shaderID
-				_json = json.dumps(rdata)
-				jsonFileNamePath = os.path.dirname(os.path.abspath(__file__)) + "/files/"+ str(user.id) +"/bmap/streams/"+str(shaderID)+".json";
-				file = open(jsonFileNamePath, 'w') 
-				file.write(_json) 
-				file.close() 
-				return redirect("/a/" + str(artwork.id) + '/content')
-				
-				
-			if path == 'shader':	
-				currentTemplate = "shaderEdit.html"
-			if path == "saveshader":
-				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders"
-				if not os.path.exists(directory):
-					os.makedirs(directory)
-				data = request.get_json(force=True)
-				
-				if str(data["filename"]) == str("None"):
-					shaderID = str(uuid.uuid4())
-				else:
-					shaderID = str(data["filename"])
-				
-				#print(str(request.form.get("code")))
-				jsonFileNamePath = directory + "/" + shaderID + ".json"
-				imageFileNamePath = directory + "/" + shaderID + ".png"
-				file = open(jsonFileNamePath, 'w') 
-				file.write(data["code"]) 
-				file.close() 
-				convert_and_save(str(data["image"]), imageFileNamePath)
-				rdata = {}
-				rdata["code"] = data["code"]
-				rdata['filename'] = shaderID
-				
-				return shaderID
-			if path == 'loadshader':
-				shaderID = request.args.get('h')
-				shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders/"+str(shaderID)+".json";
-				print(shaderFile)
-				if os.path.exists(shaderFile) == True:
-					f = open(shaderFile , "r")
+				if path == 'stream':
+					streamID = request.args.get('s')
+					streamFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/streams/"+str(streamID)+".json";
+					if os.path.exists(streamFile) == True:
+						print("x")
+						f = open(streamFile , "r")
+						x= f.read()
+						e = json.loads(x)
+					else:
+						e = {}
+						e["url"] = ""
+						e["type"] = ""
+						e["id"] = ""
+					templateData['stream'] = e	
+					currentTemplate = "template.html"
+					
+				if path == 'addstream':
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+ str(user.id)	+"/bmap/streams"
+					if not os.path.exists(directory):
+						os.makedirs(directory)
+					print(request.form['url'])
 					rdata = {}
-					rdata["code"] = f.read()
+					rdata["url"] = request.form['url']
+					rdata["type"] = request.form['type']
+					if(request.form['id'] == ''):
+						shaderID = str(uuid.uuid4())
+					else:
+						shaderID = request.form['id']
+					rdata["id"] = shaderID
+					_json = json.dumps(rdata)
+					jsonFileNamePath = os.path.dirname(os.path.abspath(__file__)) + "/files/"+ str(user.id) +"/bmap/streams/"+str(shaderID)+".json";
+					file = open(jsonFileNamePath, 'w') 
+					file.write(_json) 
+					file.close() 
+					return redirect("/a/" + str(artwork.id) + '/content')
+					
+					
+				if path == 'shader':	
+					currentTemplate = "shaderEdit.html"
+				if path == "saveshader":
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders"
+					if not os.path.exists(directory):
+						os.makedirs(directory)
+					data = request.get_json(force=True)
+					
+					if str(data["filename"]) == str("None"):
+						shaderID = str(uuid.uuid4())
+					else:
+						shaderID = str(data["filename"])
+					
+					#print(str(request.form.get("code")))
+					jsonFileNamePath = directory + "/" + shaderID + ".json"
+					imageFileNamePath = directory + "/" + shaderID + ".png"
+					file = open(jsonFileNamePath, 'w') 
+					file.write(data["code"]) 
+					file.close() 
+					convert_and_save(str(data["image"]), imageFileNamePath)
+					rdata = {}
+					rdata["code"] = data["code"]
 					rdata['filename'] = shaderID
-				else:
+					
+					return shaderID
+				if path == 'loadshader':
+					shaderID = request.args.get('h')
+					
+					allDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"
+					userDirs = os.listdir(allDir)
+					
+					for userDir in userDirs:
+						shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/shaders/"+str(shaderID)+".json";
+						print(shaderFile)
+						if os.path.exists(shaderFile) == True:
+							f = open(shaderFile , "r")
+							rdata = {}
+							rdata["code"] = f.read()
+							rdata['filename'] = shaderID
+							return jsonify(rdata)
+					
+					
+					
 					rdata = {}
 					rdata["code"] = "// item not found"
 					rdata['filename'] = "None"
+						
+					return jsonify(rdata)
+				if path == 'shaderimg':
+					allDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"
+					userDirs = os.listdir(allDir)
 					
-				return jsonify(rdata)
-			if path == 'shaderimg':
-				shaderID = request.args.get('i')
-				shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/shaders/"+str(shaderID);
-				if os.path.exists(shaderFile) == True:
-					return  send_file(shaderFile)
-				else:
+					shaderID = request.args.get('i')
+					
+					for userDir in userDirs:
+						shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/shaders/"+str(shaderID);
+						if os.path.exists(shaderFile) == True:
+							return  send_file(shaderFile)
+							
+						
 					return "Nothing is lost"	
 					
-			if path == 'content':
-				shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders/"
-				shaders = []
-				if os.path.exists(shaderDir) == True:
-					listOfFiles = os.listdir(shaderDir)
-					pattern = "*.png"  
-					for entry in listOfFiles:
-						if fnmatch.fnmatch(entry, pattern):
-							print (entry)
-							shaders.append(entry)
-				
-				streamDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/streams/"
-				streams = []
-				if os.path.exists(streamDir) == True:
-					listOfFiles = os.listdir(streamDir)
-					pattern = "*.json"  
-					for entry in listOfFiles:
-						if fnmatch.fnmatch(entry, pattern):
-							f = open(streamDir + entry , "r")
-							print (streamDir + entry)
-							x= f.read()
-							e = json.loads(x)
-							streams.append(e)
+				if path == 'content':
+					#loop through all 
 					
-				templateData['shaders'] = shaders
-				templateData['streams'] = streams
-			if path == 'cue':
-				print("x")
-				templateData['section'] = 'cue'
-				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maps"
-				fileNamePath = directory + "/bmap.json"
-				with open(fileNamePath) as file_:
-					data = file_.read()
-				jdata = json.loads(data)
-				surfaces = []
-				count = 0
-				for polygon in jdata['polygons']:
-					surfaces.append(count)
-					count = count + 1
-				
-				templateData['surfaces'] = surfaces
-				
-				shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders/"
-				shaders = []
-				if os.path.exists(shaderDir) == True:
-					listOfFiles = os.listdir(shaderDir)
-					pattern = "*.png"  
-					for entry in listOfFiles:
-						if fnmatch.fnmatch(entry, pattern):
-							print (entry)
-							shaders.append(entry)
-				
-				templateData['shaders'] = shaders
-			if path == 'livesurfaces':
-				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(user.id) + "/bmap/live"
-				if os.path.exists(directory):
-					shutil.rmtree(directory)
-				os.makedirs(directory)
-				
-				fileNamePath = directory + "/live.json"
-				data = request.form.get("json")
-				file = open(fileNamePath, 'w') 
-				file.write(data) 
-				file.close() 
-				return "Done"
-				
-			if path == 'islive':
-				directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(user.id) + "/bmap/live"
-				fileNamePath = directory + "/live.json"
-				if os.path.exists(fileNamePath) == True:
-					f = open(fileNamePath , "r")
-					rdata = f.read()
-				else:
-					rdata = 'none'
+					shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders/"
+					shaders = []
+					if os.path.exists(shaderDir) == True:
+						listOfFiles = os.listdir(shaderDir)
+						pattern = "*.png"  
+						for entry in listOfFiles:
+							if fnmatch.fnmatch(entry, pattern):
+								print (entry)
+								shaders.append(entry)
 					
-				return rdata
-		else:
+					streamDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/streams/"
+					streams = []
+					if os.path.exists(streamDir) == True:
+						listOfFiles = os.listdir(streamDir)
+						pattern = "*.json"  
+						for entry in listOfFiles:
+							if fnmatch.fnmatch(entry, pattern):
+								f = open(streamDir + entry , "r")
+								print (streamDir + entry)
+								x= f.read()
+								e = json.loads(x)
+								streams.append(e)
+	
+						
+					templateData['shaders'] = shaders
+					templateData['streams'] = streams
+				if path == 'cue':
+					templateData['section'] = 'cue'
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(artwork.adminID)	+"/bmap/maps"
+					fileNamePath = directory + "/bmap.json"
+					with open(fileNamePath) as file_:
+						data = file_.read()
+					jdata = json.loads(data)
+					surfaces = []
+					count = 0
+					for polygon in jdata['polygons']:
+						surfaces.append(count)
+						count = count + 1
+					
+					templateData['surfaces'] = surfaces
+					
+					allDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"
+					userDirs = os.listdir(allDir)
+					shaders = []
+					for userDir in userDirs:
+						shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)	+"/bmap/shaders/"
+						
+						if os.path.exists(shaderDir) == True:
+							print(userDir, user.id)
+							if str(userDir) != str(user.id):
+								listOfFiles = os.listdir(shaderDir)
+								pattern = "*.png"  
+								for entry in listOfFiles:
+									if fnmatch.fnmatch(entry, pattern):
+										print (userDir, entry)
+										shaders.append(entry)
+					
+					
+					templateData['shaders'] = shaders
+					
+					myshaders = []
+					shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/shaders/"
+						
+					if os.path.exists(shaderDir) == True:
+						listOfFiles = os.listdir(shaderDir)
+						pattern = "*.png"  
+						for entry in listOfFiles:
+							if fnmatch.fnmatch(entry, pattern):
+								print (userDir, entry)
+								myshaders.append(entry)
+				
+					templateData['myshaders'] = myshaders
+					
+				if path == 'livesurfaces':
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
+					if os.path.exists(directory):
+						shutil.rmtree(directory)
+					os.makedirs(directory)
+					
+					fileNamePath = directory + "/live.json"
+					data = request.form.get("json")
+					file = open(fileNamePath, 'w') 
+					file.write(data) 
+					file.close() 
+					return "Done"
+					
+				if path == 'islive':
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
+					fileNamePath = directory + "/live.json"
+					if os.path.exists(fileNamePath) == True:
+						f = open(fileNamePath , "r")
+						rdata = f.read()
+					else:
+						rdata = 'none'
+						
+					return rdata
+			else:
+				if not hasattr(templateData, 'section'):
+					return redirect(templateData['URL'] + '/cue')
+
 			
-		
-			templateData['section'] = 'cue'
 			
-		
-		
-		if current_user.is_authenticated == True:
-			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/maps"
+			
+			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(artwork.adminID)	+"/bmap/maps"
 			if templateData['section'] == "getmapdata":
 			 	fileNamePath = directory + "/bmap.json"
 			 	with open(fileNamePath) as file_:

@@ -3,12 +3,21 @@ body {
   background: #111;
 }
 
-.feather {
-  width: 16px;
-  height: 16px;
-  vertical-align: text-bottom;
+.shaderTitle{
+	color: #efefef;
 }
 
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
+  width:100vw;
+  
+}
+
+._card {
+    display: inline-block;
+  }
 /*
  * Sidebar
  */
@@ -67,9 +76,11 @@ body {
  * Navbar
  */
 
-.navbar-brand {
-  padding-top: .75rem;
-  padding-bottom: .75rem;
+
+
+.navbar {
+  padding-top: 5px!important;
+  padding-bottom: 5px!important;
   font-size: 1rem;
   background-color: rgba(0, 0, 0, .25);
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, .25);

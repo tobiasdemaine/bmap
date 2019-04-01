@@ -1,6 +1,5 @@
 # bmap
-=
-an artSite plugin tool for creating augmented projection installations in a web browser 
+an artSite plugin tool for creating augmented projection installations in a webGL capable browser 
 ---------
 
 * Display and Capture phase sequence >>  more work on phaze lines and position
@@ -29,6 +28,6 @@ an artSite plugin tool for creating augmented projection installations in a web 
 
 --------
 
-Web Sockets to change content from server or client
+?? Web Sockets to change content from server or client
 
 object plot from camera 

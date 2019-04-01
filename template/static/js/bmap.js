@@ -1154,7 +1154,7 @@ bmap = function(){
 		
 		
 		this.scene = new THREE.Scene();
-		this.scene.background = new THREE.Color( 0xff0000 );
+		//this.scene.background = new THREE.Color( 0xff0000 );
 		this.plane = new THREE.PlaneBufferGeometry( width, height );
 		
 		
@@ -1469,6 +1469,7 @@ function surfacesLoad(){
 
 function surfacesToMaterial(){
 	for(a=0;a<maps.length;a++){
+		console.log(previewSurfaces[a].code)
 		maps[a].renderShaderToTextureSetup(previewSurfaces[a].code)
 	}
 }
