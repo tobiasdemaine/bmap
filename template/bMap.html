@@ -66,14 +66,23 @@
 			//varying vec2 fragCoord;
     		//varying vec2 vUv; 
     		
-    		
-			
+    		//attribute vec3 position;
+			attribute vec2 surfacePosAttrib;
+			varying vec2 surfacePosition;
+
 			void main() {
-				//vUv = uv;
-		        gl_Position = vec4(position, 1.0 );
-		        //fragCoord = position.xy;
+
+				surfacePosition = surfacePosAttrib;
+				gl_Position = vec4( position, 1.0 );
 
 			}
+			
+			//void main() {
+				//vUv = uv;
+		       // gl_Position = vec4(position, 1.0 );
+		        //fragCoord = position.xy;
+
+			//}
 
 
 		</script>

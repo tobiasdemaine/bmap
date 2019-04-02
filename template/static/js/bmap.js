@@ -1126,6 +1126,7 @@ bmap = function(){
 		
 		this.vertexCode = document.getElementById( 'surfaceVertexShader' ).textContent;
 		this.uniforms = { 
+			surfacePosition : { type: "v2", value : new THREE.Vector2() }, 
 			surfaceSize : { type: "v2", value : new THREE.Vector2() }, 
 			resolution: { type: "v2", value: new THREE.Vector2() },      // canvas size (width,height)
     		time: { value: 1.0 },
@@ -1137,6 +1138,8 @@ bmap = function(){
 		this.uniforms.surfaceSize.value.y = this.shaderHeight;
 		this.uniforms.resolution.value.x = this.shaderWidth;
 		this.uniforms.resolution.value.y = this.shaderHeight;
+		this.uniforms.surfacePosition.value.x = 0;//this.shaderWidth;
+		this.uniforms.surfacePosition.value.y = 0;//this.shaderHeight;
 		
 		this.xshaderMaterial = new THREE.ShaderMaterial( {
 			uniforms: this.uniforms,

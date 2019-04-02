@@ -81,7 +81,7 @@
 		 {% endif %}
 	</div>
 	<div><div class="p-3"><span class="shaderTitle">My Shaders</span>
-		<a href="{{tmp.URL}}/shader" class="btn btn-sm btn-outline-secondary float-right ml-1">New GLSLShader</a>
+		<a href="javascript:newShader()" class="btn btn-sm btn-outline-secondary float-right ml-1">New GLSLShader</a>
         <!-- <a href="{{tmp.URL}}/stream" class="btn btn-sm btn-outline-secondary float-right">New Stream</a> -->
         </div>
 		<div class="scrolling-wrapper" >
@@ -165,12 +165,30 @@
 	  $(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
 	}
 	
+	function newShader(){
+		loc = window.location.href.split("/cue")[0]+'/shader'
+		$('<iframe>', {
+   			src: loc,
+   			id:  'shaderEdit',
+   			frameborder: 0,
+   			scrolling: 'no'
+   		}).appendTo('body');
+	}
+	
 	function loadShader(img){
           	hash = $(img).attr('src').replace(".png", "").split('i=')[1];
           	loc = window.location.href.split("/cue")[0]+'/shader#'+hash
-          	document.location.href = loc
+          	$('<iframe>', {
+   				src: loc,
+   				id:  'shaderEdit',
+   				frameborder: 0,
+   				scrolling: 'no'
+   			}).appendTo('body');
           }
     	
+    function closeShaderEdit(){
+     	$('#shaderEdit').remove();
+	}
     </script>
     
 	  <!-- 
