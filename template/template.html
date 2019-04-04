@@ -11,6 +11,8 @@
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css/styles.css" >
+    <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css/bootstrap-datetimepicker.min.css" >
+    
   </head>
 
   <body>
@@ -19,7 +21,7 @@
     <nav class="navbar navbar-dark sticky-top bg-dark  p-0" id="mainNav">
        <div class="text-nowrap" >
         <a class="p-3" href="{{tmp.URL}}/cue">
-          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %}
+          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %} <a href="javascript:loadCalendar()" class="p-3">Calendar</a>
 
         
        <!--  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -74,7 +76,14 @@
 		{% endfor %}
 		<a href="javascript:preview()" class="btn btn-success float-right">Preview</a>
 		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
-		<a href="#" class="btn btn-warning float-right">Set Future</a>
+		<a href="javascript:openFuture()" class="btn btn-warning float-right">Set Future</a>
+		<div id="futureDateTimeWrap">
+		<div id="futureDateTime">
+			<input size="26" type="text" value="" id="futureDateTimeInput" readonly class="form-control form_datetime">
+			<a href="javascript:closeFuture()" class="btn btn-danger">Cancel</a>
+			<a href="javascript:setFuture()" class="btn btn-warning float-right">Set Future</a>
+		</div>
+		</div>
 		{% endif %}
 		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
 		 <a href="javascript:setLive()" class="btn btn-danger float-right">Set Live</a>
@@ -98,6 +107,28 @@
     </div>
     <a href="javascript:destroyIframe();" id="closeIframe" class="btn btn-danger">Close</a>
     <script>
+    
+    window.addEventListener('load', function() {
+    	$(".form_datetime").datetimepicker({format: 'yyyy-mm-dd hh:ii'});
+    	
+    });
+    
+    function setFuture(){
+    	$('#futureDateTimeWrap').fadeOut();
+    	futureTime = $(".form_datetime").val()
+    	tmLoc = new Date(futureTime);
+    	console.log(tmLoc.getTime());
+    	surfaceSaveFutureDate(tmLoc.getTime())
+    }
+    
+    function closeFuture(){
+    	$('#futureDateTimeWrap').fadeOut();
+    }
+    
+     function openFuture(){
+     	$(".form_datetime").val('')
+    	$('#futureDateTimeWrap').fadeIn();
+    }
     
     function destroyIframe(){
     	$("#preview").remove();
@@ -147,6 +178,23 @@
     	$("#closeIframe").fadeIn();
     }
     
+    function previewCalendar(id){
+    
+    	jstring = JSON.stringify(currentCalendar[id].data);
+    	hash =  window.btoa(jstring)
+    	loc = window.location.href.split("/cue")[0]+'/setup#'+hash
+    	
+    	$('<iframe>', {
+   			src: loc,
+   			id:  'preview',
+   			frameborder: 0,
+   			scrolling: 'no'
+   		}).appendTo('body');
+    	
+    	$("#closeIframe").fadeIn();
+    }
+    
+    
     
     function allowDrop(ev) {
 	  ev.preventDefault();
@@ -165,6 +213,43 @@
 	  $(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
 	}
 	
+	currentCalendar = []
+	function loadCalendar(){
+		loc = window.location.href.split("/cue")[0]+'/loadcalendar';
+		$.getJSON( loc, function( calendar ) {
+			// destroy existing calendar
+			currentCalendar = calendar;
+			$("#calendar").remove();
+			$('<div>', { id: 'calendar'}).appendTo('body');
+			// loop through the entries and build the ui
+			$('<div>', { id: 'calendarDataWrap'}).html("<div id='calendarMenu'><a href='#' onclick='$(\"#calendar\").fadeOut();' class='m-2 float-right'>Close Calendar</a>&nbsp;<br>&nbsp;</div>").appendTo('#calendar');
+			$('<div>', { id: 'calendarDataWrap'}).appendTo('#calendar');
+			$('<div>', { id: "calendarPadTop"}).appendTo('#calendarDataWrap');
+			for(i=0;i < calendar.length; i++){
+				if(calendar[i].data[0].surfaceLink!==""){
+					mdate = new Date(parseInt(calendar[i].file.replace(',json', '')))
+					imgs = []
+					for(e=0;e<calendar[i].data.length;e++){
+						imgs.push("<img src='{{tmp.URL}}/shaderimg?i=" + calendar[i].data[e].surfaceLink + ".png'>");
+					}
+					mhtml = "<span class='calendarDate'><a href='javascript:previewCalendar("+i+")' class='m-2 btn btn-success float-right'>Preview</a> <div class='float-right m-2'>" + mdate.toDateString() + " : " + mdate.toTimeString().split(" ")[0] + " </div>   <!--<a href='#' class='m-1 btn btn-success float-left'>Set Live</a>--> <a href='javascript:deleteCalendarItem(" + i + ")' class='btn m-1 btn-danger float-left btn-sm '>Delete</a></span>"  + imgs.join('')
+					$('<div>', { id: "calendarItem"+i, class:'calendarItem'}).html(mhtml).appendTo('#calendarDataWrap');
+				}
+				
+			}
+			
+		});
+	}
+	
+	function deleteCalendarItem(item){
+		url = window.location.href.split("/cue")[0]+"/removecalendar?f="+currentCalendar[item].file
+		
+		$.get(url, function(data, status){
+    		$("#calendarItem"+item).remove();
+		
+  		});
+	}
+	
 	function newShader(){
 		loc = window.location.href.split("/cue")[0]+'/shader'
 		$('<iframe>', {
@@ -174,6 +259,9 @@
    			scrolling: 'no'
    		}).appendTo('body');
 	}
+	
+	
+	
 	
 	function loadShader(img){
           	hash = $(img).attr('src').replace(".png", "").split('i=')[1];
@@ -188,6 +276,24 @@
     	
     function closeShaderEdit(){
      	$('#shaderEdit').remove();
+	}
+	
+	function surfaceSaveFutureDate(date){
+		surfaces = []
+    	$(".surface").each(function(){
+    		x = {}
+    		x.surfaceLink = $(this).attr('data-surfacelink');
+    		x.surfaceType = $(this).attr('data-surfacetype');
+    		surfaces.push(x);
+    	});
+		jstring = JSON.stringify(surfaces);
+    	hash =  window.btoa(jstring);
+    	data = {};
+		data.json = jstring;
+		data.date = date;
+		$.post( "./futuresurfaces", data ).done(function( data ) {
+			closeFuture()
+		});
 	}
     </script>
     
@@ -267,10 +373,12 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" ></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script src="/assets/{{tmp.artwork.id}}/js/bootstrap-datetimepicker.min.js"></script>
     {% if tmp.section == "que" %}
-	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    
+	<!-- <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script> 
 	<script src="/assets/{{tmp.artwork.id}}/js/jquery.schedule.min.js"></script>
-    <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css/jquery.schedule.min.css">
+    <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css/jquery.schedule.min.css">-->
 	<script>
 	$('#schedule').jqs();
 	</script>

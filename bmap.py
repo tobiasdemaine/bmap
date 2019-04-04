@@ -212,20 +212,82 @@ def render(artwork, user, path):
 				
 					templateData['myshaders'] = myshaders
 					
+				if path == 'futuresurfaces':
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture"
+					if not os.path.exists(directory):
+						os.makedirs(directory)
+					
+					
+					date = request.form.get("date")
+					data = request.form.get("json")
+					
+					fileNamePath = directory + "/" + date  +".json"
+					
+					file = open(fileNamePath, 'w') 
+					file.write(data) 
+					file.close() 
+					
+					return "Saved"
+				if path == 'removecalendar':
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
+					filename = request.args.get('f');
+					if os.path.exists(directory+filename) == True:
+						os.remove(directory+filename)
+					return "Done";
+						
+				if path == 'loadcalendar':	
+					calendar = []
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
+					
+					if os.path.exists(directory) == True:
+						listOfFiles = os.listdir(directory)
+						pattern = "*.json"  
+						listOfFilesSorted = sorted(listOfFiles)
+						for entry in listOfFilesSorted:
+							if fnmatch.fnmatch(entry, pattern):
+								dateTime = {}
+								dateTime["file"] = entry
+								f = open(directory + entry , "r")
+								dateTime["data"] = json.loads(f.read())
+								calendar.append(dateTime)
+				
+					return jsonify(calendar)
+				
 				if path == 'livesurfaces':
 					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
-					if os.path.exists(directory):
-						shutil.rmtree(directory)
-					os.makedirs(directory)
+					if not os.path.exists(directory):
+						os.makedirs(directory)
 					
 					fileNamePath = directory + "/live.json"
 					data = request.form.get("json")
 					file = open(fileNamePath, 'w') 
 					file.write(data) 
 					file.close() 
-					return "Done"
+					return "Saved"
 					
 				if path == 'islive':
+					# isle requirers a has of server current time
+					mtime = int(request.args.get('t'));
+					# search calendar based on date time file entries in 
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
+					
+					if os.path.exists(directory) == True:
+						listOfFiles = os.listdir(directory)
+						pattern = "*.json"  
+						listOfFilesSorted = sorted(listOfFiles)
+						lastTime = 0;
+						deleteList = []
+						for entry in listOfFilesSorted:
+							if fnmatch.fnmatch(entry, pattern):
+								mentry = int(entry.replace(".json", ""))
+								if(mentry >= lastTime):
+									deleteList.append(entry)
+								if(mentry < lastTime):
+									break
+								lastTIme = mentry
+						thefile = directory + string(lastTime) + ".json"
+							
+							
 					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
 					fileNamePath = directory + "/live.json"
 					if os.path.exists(fileNamePath) == True:
@@ -233,6 +295,8 @@ def render(artwork, user, path):
 						rdata = f.read()
 					else:
 						rdata = 'none'
+						
+					
 						
 					return rdata
 			else:
