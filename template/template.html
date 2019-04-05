@@ -21,7 +21,7 @@
     <nav class="navbar navbar-dark sticky-top bg-dark  p-0" id="mainNav">
        <div class="text-nowrap" >
         <a class="p-3" href="{{tmp.URL}}/cue">
-          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %} <a href="javascript:loadCalendar()" class="p-3">Calendar</a>
+          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %} <a href="javascript:loadCalendar()" class="p-3">Cue</a>
 
         
        <!--  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -222,7 +222,7 @@
 			$("#calendar").remove();
 			$('<div>', { id: 'calendar'}).appendTo('body');
 			// loop through the entries and build the ui
-			$('<div>', { id: 'calendarDataWrap'}).html("<div id='calendarMenu'><a href='#' onclick='$(\"#calendar\").fadeOut();' class='m-2 float-right'>Close Calendar</a>&nbsp;<br>&nbsp;</div>").appendTo('#calendar');
+			$('<div>', { id: 'calendarDataWrap'}).html("<div id='calendarMenu'><a href='#' onclick='$(\"#calendar\").fadeOut();' class='m-2 float-right'>Close Cue</a>&nbsp;<br>&nbsp;</div>").appendTo('#calendar');
 			$('<div>', { id: 'calendarDataWrap'}).appendTo('#calendar');
 			$('<div>', { id: "calendarPadTop"}).appendTo('#calendarDataWrap');
 			for(i=0;i < calendar.length; i++){

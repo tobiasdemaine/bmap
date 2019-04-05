@@ -267,36 +267,78 @@ def render(artwork, user, path):
 					
 				if path == 'islive':
 					# isle requirers a has of server current time
-					mtime = int(request.args.get('t'));
+					
+					if request.args.get('t') == None:
+						return 'none'
+					else:
+						mtime = int(request.args.get('t'))
+					
 					# search calendar based on date time file entries in 
 					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
-					
+					lastTime = 0;
+					theFile = "";
 					if os.path.exists(directory) == True:
 						listOfFiles = os.listdir(directory)
 						pattern = "*.json"  
 						listOfFilesSorted = sorted(listOfFiles)
-						lastTime = 0;
+						
 						deleteList = []
 						for entry in listOfFilesSorted:
 							if fnmatch.fnmatch(entry, pattern):
 								mentry = int(entry.replace(".json", ""))
-								if(mentry >= lastTime):
+								if(mtime > mentry):
 									deleteList.append(entry)
-								if(mentry < lastTime):
-									break
-								lastTIme = mentry
-						thefile = directory + string(lastTime) + ".json"
-							
+								if(mtime > lastTime):
+									#readfile and make 
+									f = open(directory + entry , "r")
+									d = json.loads(f.read())
+									v = 0
+									for z in d:
+										
+										if z['surfaceLink'] == '':
+											
+											v = 1
+											break
+											
+									if v == 1:
+										deleteList.append(entry)
+									else:
+										if(mtime < mentry):
+											#lastTime = mentry
+											break
+									
+								lastTime = mentry
+								
+						theFile = directory + str(lastTime) + ".json"
+						#deleteList.pop()
+						
+						
+						for delItem in deleteList:
+							print(directory + delItem)
+							if os.path.exists(directory + delItem) == True:
+								os.remove(directory + delItem)
+						
 							
 					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
 					fileNamePath = directory + "/live.json"
 					if os.path.exists(fileNamePath) == True:
-						f = open(fileNamePath , "r")
-						rdata = f.read()
+						mtime = os.path.getmtime(fileNamePath) 
+						if(mtime > lastTime):
+							f = open(fileNamePath , "r")
+							rdata = f.read()
+						else:
+							if theFile == "":
+								rdata = 'none'
+							else:
+								f = open(theFile , "r")
+								rdata = f.read()
 					else:
-						rdata = 'none'
+						if theFile == "":
+							rdata = 'none'
+						else:
+							f = open(theFile , "r")
+							rdata = f.read()
 						
-					
 						
 					return rdata
 			else:

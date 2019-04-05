@@ -1480,7 +1480,8 @@ lastdata = ""
 function loadLiveSurfaces(){
 	ur = theURL.split("/").reverse()
 	_url = "/" + ur[2] + "/" + ur[1] + "/";
-	url = _url + "islive";
+	nowTime = new Date;
+	url = _url + "islive?t="+nowTime.getTime();
 	$.getJSON( url, function( data ) {
 		if(lastdata != JSON.stringify(data)){
 			lastdata = JSON.stringify(data);
