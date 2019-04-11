@@ -26,8 +26,5 @@ an artSite plugin tool for creating augmented projection installations in a webG
 
 * select Fulscreen
 
---------
 
-?? Web Sockets to change content from server or client
 
-object plot from camera 

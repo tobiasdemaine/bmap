@@ -16,18 +16,60 @@ var live = false;
 var theURL;
 
 
+// audio hooks
+var hasaudio = false;
+var audioBufferLength;
+var audioDataArray;
+
+var audioCtx;
+var audioAnalyser;
+var audioSource
+      
+
 
 $(function() {
-	// check hash
-	
+ // load the audio as 2 channel
+ 	  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+ 	  audioAnalyser = audioCtx.createAnalyser();
+      navigator.getUserMedia =
+        navigator.getUserMedia ||
+        navigator.webkitGetUserMedia ||
+        navigator.mozGetUserMedia ||
+        navigator.msGetUserMedia;
+      if (navigator.getUserMedia) {
+        navigator.getUserMedia (
+          {
+            audio: true,
+            video: false
+          },
+          function (stream) {
+          	source = audioCtx.createMediaStreamSource(stream);
+			source.connect(audioAnalyser);
+			audioAnalyser.fftSize = 2048;
+          	
+          	audioBufferLength = audioAnalyser.frequencyBinCount;
+			audioDataArray = new Uint8Array(audioBufferLength);
+            startUP();
+            
+            
+          },
+          function (err) {
+             //console.log('Error initializing user media stream: ' + err);
+          }
+        );
+      }
 
+});
+function startUP(){ 
+ 
+ 
   if(window.location.hash) {
   	  	var hash = window.location.hash.substring(1); //Puts hash in variable, and removes the # character
       	
       	theURL = window.location.href.split("#")[0];
       	
       	previewSurfaces = JSON.parse(window.atob(hash))
-      	console.log(previewSurfaces)
+      	//console.log(previewSurfaces)
       	preview = true;
 		beginModelfromDisk();
   }else{
@@ -78,7 +120,7 @@ $(function() {
 	});
 	
 	}
-});
+}
 
 
 function beginPhasefromDisk(){
@@ -256,10 +298,10 @@ function sendMaps(){
 		
 		data["img"+i] = mapCanvas[i].toDataURL()
 	}
-	//console.log(data)
+	////console.log(data)
 	$.post( url, data ).done(function( data ) {
 		//alert(data);
-		////console.log(data)
+		//////console.log(data)
 	});
 }
 
@@ -280,7 +322,7 @@ function webCamSetup(){
     var video = document.getElementById('video');
     var mediaConfig =  { video: true };
     var errBack = function(e) {
-    	//console.log('An error has occurred!', e)
+    	////console.log('An error has occurred!', e)
     };
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
@@ -469,7 +511,7 @@ function phaseUnwrapper(basePhase, x, y) {
 }
 
 function getPixelColor(pixel, imgA, imgB, imgC){
-	////console.log(pix)
+	//////console.log(pix)
 	pixel = pixel * 4 -4
 	
 	pix = imgA.data;
@@ -522,13 +564,13 @@ function getTexture(i1, i2, i3) {
 
 function getPixelPhase(pixel, imgd){
 	pix = imgd.data;
-	////console.log(pix)
+	//////console.log(pix)
 	pixel = pixel * 4 -4
 	r = pix[pixel]
 	g = pix[pixel + 1]
 	b = pix[pixel + 2]
 	a = 255;
-	////console.log(r, g, b ,a)
+	//////console.log(r, g, b ,a)
 	//colours.colorMode(PConstants.RGB, 255)
 	//c = colours.color(r, g, b, a)
 	_phase = ((r+g+b) /(255*3))
@@ -538,7 +580,7 @@ function getPixelPhase(pixel, imgd){
 
 function getPixel(pixel, imgd){
 	pix = imgd.data;
-	////console.log(pix)
+	//////console.log(pix)
 	pixel = pixel * 4 - 4
 	r = pix[pixel]
 	g = pix[pixel + 1]
@@ -569,15 +611,15 @@ function phaseWrap(img1, img2, img3){
 		    phase2 = (color2 & 255) / 255;
 		   	phase3 = (color3 & 255) / 255;
 		   	*/
-		   	////console.log(color1, phase1)
+		   	//////console.log(color1, phase1)
 		   	
 		   	phaseSum = phase1 + phase2 + phase3;
   			phaseRange = Math.max(phase1, phase2, phase3) - Math.min(phase1, phase2, phase3);
   			gamma = phaseRange / phaseSum;
-  			////console.log(gamma)
-  			////console.log(gamma + "=" + phaseRange +"/"+ phaseSum)
+  			//////console.log(gamma)
+  			//////console.log(gamma + "=" + phaseRange +"/"+ phaseSum)
   			mask[y][x] = gamma < noiseThreshold;
-  			////console.log(mask[y][x], (!mask[y][x]))
+  			//////console.log(mask[y][x], (!mask[y][x]))
   			process[y][x] = true;//mask[y][x];
   			
   			phase[y][x] = Math.atan2(sqrt3 * (phase1 - phase3), 2 * phase2 - phase1 - phase3) / (Math.PI * 2);// 6.283185307179586476925286766559;
@@ -602,14 +644,14 @@ function mapClick(event){
 		canTestPointCloud=true
 		var intersectsObj = raycaster.intersectObjects( editPoints.children );
 		if ( intersectsObj.length > 0 ) {
-			//console.log(intersectsObj)
+			////console.log(intersectsObj)
 			maps[currentBmap].addVector3(intersectsObj[0].object.position.clone())
 		}else{
 			var intersects = raycaster.intersectObject( maps[currentBmap].mesh );
 			if ( intersects.length > 0 ) {
 				var intersect = intersects[ 0 ];
 				var face = intersect.face;
-				//console.log(intersect.faceIndex)
+				////console.log(intersect.faceIndex)
 				if(((intersect.faceIndex * 9) + 9) < maps[currentBmap].v){
 					maps[currentBmap].removeFaceByIndex(intersect.faceIndex)
 					canTestPointCloud=false
@@ -624,7 +666,7 @@ function mapClick(event){
 				if (  intersection !== null ) {
 					maps[currentBmap].addVector3(intersection.point.clone())
 					toggle = 0
-					//console.log("ADD VECTOR")
+					////console.log("ADD VECTOR")
 				}
 			}
 		}
@@ -643,10 +685,10 @@ function newMap(){
 
 function selectMap(id){
 	currentBmap = id;
-	//console.log('selectMap' + id);
+	////console.log('selectMap' + id);
 	
 	for(l=0;l<maps.length;l++){
-		//console.log("unfocus " + l)
+		////console.log("unfocus " + l)
 		maps[l].unfocus()
 		
 	}
@@ -736,7 +778,7 @@ bMapGui = function(){
     	// select first layer if exists
     	$('.bMapGuiLayer').removeClass('selectedBmapLayer');
     	
-    	//console.log(maps.length);
+    	////console.log(maps.length);
     	if(maps.length == 0){
     		currentBmap = -1;
     	}else{
@@ -752,8 +794,8 @@ bMapGui = function(){
     this.addBMap = function(){
     	$('.bMapGuiLayer').removeClass('selectedBmapLayer');
 		$('<div/>').addClass('editTools bMapGuiLayer selectedBmapLayer').html('Layer ' + currentBmap).click(function(){ 
-			//console.log($(this).html())
-			//console.log($(this).html().replace("Layer ", ""))
+			////console.log($(this).html())
+			////console.log($(this).html().replace("Layer ", ""))
 			
 			id = parseInt($(this).html().replace("Layer ", ""));
 			selectMap(id); 
@@ -841,10 +883,10 @@ function saveScene(){
 	url = "/" + ur[2] + "/" + ur[1] + "/datatofile";
 	data = {}
 	data["data"] = JSON.stringify(bmapScene)
-	////console.log(data)
+	//////console.log(data)
 	$.post( url, data ).done(function( data ) {
 		alert(data);
-		////console.log(data)
+		//////console.log(data)
 	});
 }
 
@@ -1093,7 +1135,7 @@ bmap = function(){
 	}
 	
 	this.removeFaceByIndex = function(index){
-		//////console.log("REMOVE FACE BY INDEX  : " + index)
+		////////console.log("REMOVE FACE BY INDEX  : " + index)
 		
 		j = index*3;
 		this.editPoints[j].visible = false;
@@ -1131,7 +1173,8 @@ bmap = function(){
 			resolution: { type: "v2", value: new THREE.Vector2() },      // canvas size (width,height)
     		time: { value: 1.0 },
     		backbuffer: { value: 0 },                            // time in seconds since load
-    		mouse: { type: "v2", value: new THREE.Vector2() }            // mouse position in screen pixels
+    		mouse: { type: "v2", value: new THREE.Vector2() },
+    		audioFFT: {type: "iv1", value : audioDataArray}             // mouse position in screen pixels
 		}
 		
 		this.uniforms.surfaceSize.value.x = this.shaderWidth;
@@ -1174,6 +1217,9 @@ bmap = function(){
 		this.ProjectionMaterial.needsUpdate = true
 	}
 	this.renderShaderToTextureAnimate = function(){
+		audioAnalyser.getByteTimeDomainData(audioDataArray);
+		this.uniforms.audioFFT.value = audioDataArray
+	
 		this.uniforms.mouse.value.x = mouse.x
 		this.uniforms.mouse.value.y = mouse.y
 		var elapsedMilliseconds = Date.now() - this.startTime;
@@ -1472,7 +1518,7 @@ function surfacesLoad(){
 
 function surfacesToMaterial(){
 	for(a=0;a<maps.length;a++){
-		console.log(previewSurfaces[a].code)
+		//console.log(previewSurfaces[a].code)
 		maps[a].renderShaderToTextureSetup(previewSurfaces[a].code)
 	}
 }
@@ -1496,7 +1542,7 @@ function loadLiveSurfaces(){
 
 
 function ModelLoader(){
-	console.log("MODELLOADER");
+	//console.log("MODELLOADER");
 	
 	ur = theURL.split("/").reverse()
 	url = "/" + ur[2] + "/" + ur[1] + "/getmapdata";
@@ -1525,7 +1571,7 @@ function DrawModels(data){
 	cameraOrth.zoom = data.camera
 	cameraOrth.updateProjectionMatrix();
 	
-	//console.log(data.camera)
+	////console.log(data.camera)
 	
 	selectedCamera = cameraOrbital
 	
@@ -1547,7 +1593,7 @@ function DrawModels(data){
 		bMapGUI.addBMap(currentBmap);
 		selectMap(currentBmap);
 	}
-	console.log(data.renderMap)
+	////console.log(data.renderMap)
 	mapRotation.x = data.renderMap.rotation._x;
 	mapRotation.y = data.renderMap.rotation._y;
 	mapRotation.z = data.renderMap.rotation._z;
