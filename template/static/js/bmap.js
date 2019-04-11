@@ -401,24 +401,26 @@ var loadImage = function (url, ctx) {
 }
 
 function testAlgoFromFiles(){
+	ur = window.location.href.split("/").reverse()
+	url = "/" + ur[2] + "/" + ur[1] + "/mapimg?i=";
 	 
 	 mapCanvas[0] = document.createElement('canvas');
 	 mapCanvas[0].width = width;
 	 mapCanvas[0].height = height;
      mapContext[0] = mapCanvas[0].getContext('2d');
-     loadImage("/assets/1/img/phase1.png", mapContext[0])
+     loadImage(url + "phase2.png", mapContext[0])
      
      mapCanvas[1] = document.createElement('canvas');
 	 mapCanvas[1].width = width;
 	 mapCanvas[1].height = height;
      mapContext[1] = mapCanvas[1].getContext('2d');
-     loadImage("/assets/1/img/phase2.png", mapContext[1])
+     loadImage(url + "phase3.png", mapContext[1])
      
      mapCanvas[2] = document.createElement('canvas');
 	 mapCanvas[2].width = width;
 	 mapCanvas[2].height = height;
      mapContext[2] = mapCanvas[2].getContext('2d');
-     loadImage("/assets/1/img/phase3.png", mapContext[2])
+     loadImage(url + "phase4.png", mapContext[2])
           
 }
 

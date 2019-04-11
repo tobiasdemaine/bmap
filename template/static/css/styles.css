@@ -126,8 +126,8 @@ body {
  * DEPTH MAPPING IN SCENE SETUP
  */
  #video {
- 	width:640px;
- 	height:480px;
+ 	width:1024px;
+ 	height:768px;
  	position:absolute;
  	top: 100vh;
  }

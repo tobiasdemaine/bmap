@@ -134,8 +134,21 @@ def render(artwork, user, path):
 							return  send_file(shaderFile)
 							
 						
-					return "Nothing is lost"	
+					return "Nothing is lost"
+						
+				if path == 'mapimg':
+					allDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"
+					userDirs = os.listdir(allDir)
 					
+					mapID = request.args.get('i')
+					
+					for userDir in userDirs:
+						mapFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/maps/"+str(mapID);
+						if os.path.exists(mapFile) == True:
+							return  send_file(mapFile)
+							
+						
+					return "Nothing is lost"	
 				if path == 'content':
 					#loop through all 
 					
@@ -356,10 +369,10 @@ def render(artwork, user, path):
 			 	return data
 			
 			elif templateData['section'] == "datatofile":
-				if os.path.exists(directory):
-					shutil.rmtree(directory)
+				#if os.path.exists(directory):
+				#	shutil.rmtree(directory)
 				
-				os.makedirs(directory)
+				#os.makedirs(directory)
 				fileNamePath = directory + "/bmap.json"
 				data = request.form.get("data")
 				
@@ -378,6 +391,7 @@ def render(artwork, user, path):
 				p = []
 				for x in range(5):
 					fileNamePath = directory + "/phase" + str(x) + ".png"
+					
 					p.append(fileNamePath)
 					data = request.form.get(str("img"+str(x)))
 					convert_and_save(data, fileNamePath)
