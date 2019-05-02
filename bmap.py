@@ -12,7 +12,7 @@ def loadSettings(settingsJSON):
 
 
 
-def render(artwork, user, path):
+def render(artwork, user, path, settings):
 	currentTemplate = "template.html"
 	global Error
 	if len(Error) > 0 :
