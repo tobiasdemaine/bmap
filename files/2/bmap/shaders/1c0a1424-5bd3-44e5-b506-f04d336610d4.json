@@ -1,4 +1,6 @@
-precision mediump float;
+#ifdef GL_ES
+precision highp float;
+#endif
 
 //#extension GL_OES_standard_derivatives : enable
 

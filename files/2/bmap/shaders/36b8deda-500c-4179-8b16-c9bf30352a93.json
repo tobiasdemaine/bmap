@@ -3,9 +3,8 @@
  */
 
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
 #endif
-
 // glslsandbox uniforms
 uniform float time;
 uniform vec2 resolution;

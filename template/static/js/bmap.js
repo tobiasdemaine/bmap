@@ -29,7 +29,7 @@ var audioSource
 
 $(function() {
  // load the audio as 2 channel
- 	  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+ 	/*  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
  	  audioAnalyser = audioCtx.createAnalyser();
       navigator.getUserMedia =
         navigator.getUserMedia ||
@@ -57,13 +57,22 @@ $(function() {
              //console.log('Error initializing user media stream: ' + err);
           }
         );
-      }
-
+      }*/
+     // audioBufferLength = 1024;
+	 // audioDataArray = new Uint8Array(audioBufferLength);
+      startUP();
+		
 });
 function startUP(){ 
- 
- 
-  if(window.location.hash) {
+  if(window.location.href.split("/").pop() == "enter"){
+ // var urlParams = new URLSearchParams(window.location.search);
+  //if(urlParams.has('autostart')){
+  	theURL = window.location.href
+  	$('#helpModal').modal('hide');
+	live = true;
+	beginModelfromDisk();
+  
+  }else if(window.location.hash) {
   	  	var hash = window.location.hash.substring(1); //Puts hash in variable, and removes the # character
       	
       	theURL = window.location.href.split("#")[0];
@@ -1202,11 +1211,11 @@ bmap = function(){
 		
 		
 		this.scene = new THREE.Scene();
-		//this.scene.background = new THREE.Color( 0xff0000 );
+		this.scene.background = new THREE.Color( 0x000000 );
 		this.plane = new THREE.PlaneBufferGeometry( width, height );
 		
 		
-		this.planeMaterial = new THREE.MeshBasicMaterial({color:0x7074FF})
+		this.planeMaterial = new THREE.MeshBasicMaterial({color:0x000000})
 		this.quad = new THREE.Mesh( this.plane, this.xshaderMaterial); //this.planeMaterial );
 		
 		//this.quad.position.z = -100;
@@ -1219,7 +1228,7 @@ bmap = function(){
 		this.ProjectionMaterial.needsUpdate = true
 	}
 	this.renderShaderToTextureAnimate = function(){
-		audioAnalyser.getByteTimeDomainData(audioDataArray);
+		//audioAnalyser.getByteTimeDomainData(audioDataArray);
 		this.uniforms.audioFFT.value = audioDataArray
 	
 		this.uniforms.mouse.value.x = mouse.x
@@ -1227,6 +1236,7 @@ bmap = function(){
 		var elapsedMilliseconds = Date.now() - this.startTime;
 		var elapsedSeconds = elapsedMilliseconds / 1000.;
 		this.uniforms.time.value = elapsedSeconds;
+		renderer.context.getExtension('EXT_shader_texture_lod');
 		renderer.context.getExtension('OES_standard_derivatives');
 		renderer.render( this.scene, this.cameraRTT, this.rtTexture );
 		this.texture = this.rtTexture

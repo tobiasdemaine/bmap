@@ -20,7 +20,19 @@ def render(artwork, user, path, settings):
 		Error = []
 		return out	
 	else:
-		if current_user.is_authenticated == True:
+		auth = current_user.is_authenticated
+		if path == "enter":
+			auth = True
+			path = 'setup'
+		if path == 'livesurfaces':
+			auth = True
+		if path == 'islive':
+			auth = True
+		if path == 'getmapdata':
+			auth = True
+		if path == 'loadshader':
+			auth = True
+		if auth == True:
 			templateData = {}
 			templateData['artwork'] = artwork
 			templateData['user'] = user

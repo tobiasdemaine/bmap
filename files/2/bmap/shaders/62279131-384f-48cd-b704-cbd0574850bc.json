@@ -1,7 +1,7 @@
 //--- iron world
 // by Catzpaw 2018
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
 #endif
 
 #extension GL_OES_standard_derivatives : enable

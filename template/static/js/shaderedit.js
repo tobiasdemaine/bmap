@@ -47,7 +47,7 @@ var audioDataArray;
 var audioCtx;
 var audioAnalyser;
 var audioSource
-
+/*
 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 audioAnalyser = audioCtx.createAnalyser();
 navigator.getUserMedia =
@@ -76,7 +76,9 @@ if (navigator.getUserMedia) {
 	     //console.log('Error initializing user media stream: ' + err);
 	  }
 	);
-}
+}*/
+init();
+if (gl) { animate(); }
 
 
 
@@ -785,7 +787,7 @@ function render() {
 	// Set uniforms for custom shader
 
 	gl.useProgram( currentProgram );
-	audioAnalyser.getByteTimeDomainData(audioDataArray);
+	//audioAnalyser.getByteTimeDomainData(audioDataArray);
 	gl.uniform1f( currentProgram.uniformsCache[ 'time' ], parameters.time / 1000 );
 	gl.uniform2f( currentProgram.uniformsCache[ 'mouse' ], parameters.mouseX, parameters.mouseY );
 	gl.uniform2f( currentProgram.uniformsCache[ 'resolution' ], parameters.screenWidth, parameters.screenHeight );
