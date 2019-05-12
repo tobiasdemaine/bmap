@@ -1,0 +1,76 @@
+Installing on to nvidia shield tv
+
+Update shield android to latest version on startup 
+
+Root NVIDIA SHIELD TV > https://nvidiashieldzone.com/shield-android-tv/android-7-nougat/shield-tv-2017-root/
+
+Turn off all non relevant apps
+
+Install the bMap APK 
+
+	adb install -r bMap/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+
+install the linux console tools
+
+	adb install -r AndroidInstallationApps/com.termux_68.apk
+	adb install -r AndroidInstallationApps/com.termux.boot_5.apk
+
+on shield open termux.apk on device. now install essential tools and remote access
+
+	pkg upgrade && pkg install autoconf automake bison bzip2 clang cmake \
+	coreutils diffutils flex gawk git grep gzip libtool make patch perl  \
+    sed silversearcher-ag tar wget pkg-config tor torsocks openssh
+
+setup sshd password for device
+	
+	passwd
+	
+setup tor
+
+	nano $PREFIX/etc/tor/torrc
+	
+add line the save/exit
+	
+	## Enable TOR SOCKS proxy
+	SOCKSPort 127.0.0.1:9050
+
+	## Hidden Service: SSH
+	HiddenServiceDir /data/data/com.termux/files/home/.tor/hidden_ssh
+	HiddenServicePort 22 127.0.0.1:8022
+
+make director for tor hidden service storage 
+
+	mkdir -p ~/.tor/hidden_ssh
+
+copy down the onion hostname from file	
+
+	cat ~/.tor/hidden_ssh/hostname 
+		
+
+Setup Auto Boot
+	
+	mkdir -p ~/.termux/boot/
+	
+	nano ~/.termux/boot/startup.sh
+	
+	echo 'am start --user 0 -n com.tobiasdemaine.bmap/com.tobiasdemaine.bmap.MainActivity' >> ~/.termux/boot/startup.sh
+
+	chmod 0777 ~/.termux/boot/startup.sh
+	
+	cp ~/.termux/boot/startup.sh ~/startup.sh
+	
+	echo 'sshd && tor' >> ~/.termux/boot/startupsshd.sh
+	
+	
+allow super mode of terms
+
+	su
+	
+the click forever in popup	
+
+reboot or reset the Shield 
+
+	
+from a computer tor and torsocks installed remote access from a terminal 
+	
+	torsocks ssh 5moesphnrefhp56xjy6mdxe7qfcldvptfizbopfrdkeaqe3rx5sa3dyd.onion
