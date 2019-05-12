@@ -1546,10 +1546,11 @@ function loadLiveSurfaces(){
 			previewSurfaceID = 0
 			previewSurfaces = data;
 			surfacesLoad()
-		// set tieoiut
+			// set tieoiut
 		}
-		setTimeout(loadLiveSurfaces, 1000);
+		
 	});
+	setTimeout(loadLiveSurfaces, 1000);
 }
 
 
