@@ -78,7 +78,9 @@ float specular(vec3 n,vec3 l,vec3 e,float s) {
 vec3 getSkyColor(vec3 e) {
     float md = mix(0.86,1.0,Clubber.b);
     e.y = max(e.y,0.0);
-    return vec3(pow(0.8+md/5.0-e.y,2.0), 1.0-e.y, 0.6+(1.0-e.y)*0.4)*md;
+    //return vec3(pow(0.8+md/5.0-e.y,2.0), 1.0-e.y, 0.6+(1.0-e.y)*0.4)*md;
+return vec3(0, 0, 0);
+
 }
 
 // sea
@@ -88,6 +90,7 @@ float sea_octave(vec2 uv, float choppy) {
     vec2 swv = abs(cos(uv));    
     wv = mix(wv,swv,wv);
     return pow(1.0-pow(wv.x * wv.y,0.65),choppy);
+    //return pow(1.0-pow(wv.x * wv.y,0.65),choppy);
 }
 
 float map(vec3 p) {

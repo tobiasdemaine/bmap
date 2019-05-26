@@ -6,9 +6,9 @@ inputWidth = width;
 inputHeight = height;
 
 noiseThreshold = 0.0;
-zscale = 80;
+zscale = -80;
 zskew = 20; 
-renderDetail = 3;
+renderDetail = 1;
 
 var previewSurfaces;
 var preview = false;
@@ -1300,16 +1300,16 @@ function initThree() {
 	container.appendChild( renderer.domElement );
 	
 	
-	cameraOrth = new THREE.OrthographicCamera( width / - 2.3, width / 2.3, height / 2.3, height / - 2.3, 1, 1000 );
+	cameraOrth = new THREE.OrthographicCamera( width / - 2.3, width / 2.3, height / 2.3, height / - 2.3, -10000, 100000 );
 	
 	
 	camera = new THREE.PerspectiveCamera( 75, width/height, 0.1, 200000 );
 	
 	camera._name = "static"
-	cameraOrbital = new THREE.PerspectiveCamera( 75, width/height, 0.1, 200000 );
+	cameraOrbital = new THREE.PerspectiveCamera( 75, width/height, 0.00001, 200000 );
 	cameraOrbital._name = "orbital"
 	controls = new THREE.OrbitControls( cameraOrbital , renderer.domElement);
-	
+	controls.minDistance = 0;
 	selectedCamera = cameraOrbital;
 	
 	controls.enabled = true;
@@ -1399,7 +1399,9 @@ animate = function () {
 			}
 		}
 		
+			
 		if(bufferpoints !== undefined){
+			xc = bufferpoints.geometry.center()
 			controls.target.set(0, 0, 0);
 			controls.update();
 		}
