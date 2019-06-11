@@ -17,6 +17,7 @@
     <content src="index.html" />
     <access origin="*" />
     <allow-navigation href="http://139.162.4.103/*" />
+    <allow-navigation href="https://ocular.ink/*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />

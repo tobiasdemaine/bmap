@@ -11,6 +11,7 @@
     <plugin name="cordova-plugin-whitelist" spec="1" />
     <access origin="*" />
     <allow-navigation href="http://139.162.4.103/*" />
+    <allow-navigation href="https://ocular.ink/*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
     <allow-intent href="tel:*" />
