@@ -1288,7 +1288,9 @@ function initThree() {
 
 	container = document.getElementById( 'three' ); 
 	scene = new THREE.Scene();
-	renderer = new THREE.WebGLRenderer();
+	renderer = new THREE.WebGLRenderer({
+		antialias	: true
+	});
 	clock = new THREE.Clock();
 	
 	scene.add( new THREE.AmbientLight( 0x555555 ) );

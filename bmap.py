@@ -9,10 +9,12 @@ def loadSettings(settingsJSON):
 		Settings = json.loads(settingsJSON)
 	else:
 		Error.append("No Settings File For Plugin")
-
+	return Settings
 
 
 def render(artwork, user, path, settings):
+	print("----")
+	print(settings)
 	currentTemplate = "template.html"
 	global Error
 	if len(Error) > 0 :
@@ -419,7 +421,7 @@ def render(artwork, user, path, settings):
 				out = template.render(tmp=templateData)
 				return out			
 		else:
-			return redirect('/user/sign-in')
+			return settings["indexHTML"]#redirect('/user/sign-in')
 
 
 
