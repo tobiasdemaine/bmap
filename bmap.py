@@ -13,8 +13,6 @@ def loadSettings(settingsJSON):
 
 
 def render(artwork, user, path, settings):
-	print("----")
-	print(settings)
 	currentTemplate = "template.html"
 	global Error
 	if len(Error) > 0 :
@@ -44,54 +42,11 @@ def render(artwork, user, path, settings):
 				templateData['section'] = path
 				if path == 'setup':
 					currentTemplate = "bMap.html"
-				if path == 'removestream':
-					streamID = request.args.get('s')
-					streamFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/streams/"+str(streamID)+".json";
-					if os.path.exists(streamFile) == True:
-						os.remove(streamFile)
-					return redirect("/a/" + str(artwork.id) + '/content')
 				
-				if path == 'stream':
-					streamID = request.args.get('s')
-					streamFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/streams/"+str(streamID)+".json";
-					if os.path.exists(streamFile) == True:
-						print("x")
-						f = open(streamFile , "r")
-						x= f.read()
-						e = json.loads(x)
-					else:
-						e = {}
-						e["url"] = ""
-						e["type"] = ""
-						e["id"] = ""
-					templateData['stream'] = e	
-					currentTemplate = "template.html"
-					
-				if path == 'addstream':
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+ str(user.id)	+"/bmap/streams"
-					if not os.path.exists(directory):
-						os.makedirs(directory)
-					print(request.form['url'])
-					rdata = {}
-					rdata["url"] = request.form['url']
-					rdata["type"] = request.form['type']
-					if(request.form['id'] == ''):
-						shaderID = str(uuid.uuid4())
-					else:
-						shaderID = request.form['id']
-					rdata["id"] = shaderID
-					_json = json.dumps(rdata)
-					jsonFileNamePath = os.path.dirname(os.path.abspath(__file__)) + "/files/"+ str(user.id) +"/bmap/streams/"+str(shaderID)+".json";
-					file = open(jsonFileNamePath, 'w') 
-					file.write(_json) 
-					file.close() 
-					return redirect("/a/" + str(artwork.id) + '/content')
-					
-					
 				if path == 'shader':	
 					currentTemplate = "shaderEdit.html"
 				if path == "saveshader":
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/" + str(artwork.id) + "/shaders"
 					if not os.path.exists(directory):
 						os.makedirs(directory)
 					data = request.get_json(force=True)
@@ -120,7 +75,7 @@ def render(artwork, user, path, settings):
 					userDirs = os.listdir(allDir)
 					
 					for userDir in userDirs:
-						shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/shaders/"+str(shaderID)+".json";
+						shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/" + str(artwork.id) + "/shaders/"+str(shaderID)+".json";
 						print(shaderFile)
 						if os.path.exists(shaderFile) == True:
 							f = open(shaderFile , "r")
@@ -143,7 +98,7 @@ def render(artwork, user, path, settings):
 					shaderID = request.args.get('i')
 					
 					for userDir in userDirs:
-						shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/shaders/"+str(shaderID);
+						shaderFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/" + str(artwork.id) + "/shaders/"+str(shaderID);
 						if os.path.exists(shaderFile) == True:
 							return  send_file(shaderFile)
 							
@@ -157,7 +112,7 @@ def render(artwork, user, path, settings):
 					mapID = request.args.get('i')
 					
 					for userDir in userDirs:
-						mapFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/maps/"+str(mapID);
+						mapFile = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)+"/bmap/" + str(artwork.id) + "/maps/"+str(mapID);
 						if os.path.exists(mapFile) == True:
 							return  send_file(mapFile)
 							
@@ -166,7 +121,7 @@ def render(artwork, user, path, settings):
 				if path == 'content':
 					#loop through all 
 					
-					shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/shaders/"
+					shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/" + str(artwork.id) + "/shaders/"
 					shaders = []
 					if os.path.exists(shaderDir) == True:
 						listOfFiles = os.listdir(shaderDir)
@@ -176,7 +131,7 @@ def render(artwork, user, path, settings):
 								print (entry)
 								shaders.append(entry)
 					
-					streamDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/streams/"
+					streamDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/" + str(artwork.id) + "/streams/"
 					streams = []
 					if os.path.exists(streamDir) == True:
 						listOfFiles = os.listdir(streamDir)
@@ -194,7 +149,7 @@ def render(artwork, user, path, settings):
 					templateData['streams'] = streams
 				if path == 'cue':
 					templateData['section'] = 'cue'
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(artwork.adminID)	+"/bmap/maps"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(artwork.adminID)	+"/bmap/" + str(artwork.id) + "/maps"
 					fileNamePath = directory + "/bmap.json"
 					with open(fileNamePath) as file_:
 						data = file_.read()
@@ -207,11 +162,24 @@ def render(artwork, user, path, settings):
 					
 					templateData['surfaces'] = surfaces
 					
+					apps = []
+					appsDir = os.path.dirname(os.path.abspath(__file__)) + "/template/static/apps"
+					
+					listOfFiles = os.listdir(appsDir)
+					pattern = "*.js"  
+					for entry in listOfFiles:
+						if fnmatch.fnmatch(entry, pattern):
+							print(entry)
+							apps.append(entry)
+					
+					templateData['apps'] = apps
+					
+					
 					allDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"
 					userDirs = os.listdir(allDir)
 					shaders = []
 					for userDir in userDirs:
-						shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)	+"/bmap/shaders/"
+						shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(userDir)	+"/bmap/" + str(artwork.id) + "/shaders/"
 						
 						if os.path.exists(shaderDir) == True:
 							print(userDir, user.id)
@@ -227,7 +195,7 @@ def render(artwork, user, path, settings):
 					templateData['shaders'] = shaders
 					
 					myshaders = []
-					shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/shaders/"
+					shaderDir = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)+"/bmap/" + str(artwork.id) + "/shaders/"
 						
 					if os.path.exists(shaderDir) == True:
 						listOfFiles = os.listdir(shaderDir)
@@ -240,7 +208,7 @@ def render(artwork, user, path, settings):
 					templateData['myshaders'] = myshaders
 					
 				if path == 'futuresurfaces':
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/surfacefuture"
 					if not os.path.exists(directory):
 						os.makedirs(directory)
 					
@@ -256,7 +224,7 @@ def render(artwork, user, path, settings):
 					
 					return "Saved"
 				if path == 'removecalendar':
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/surfacefuture/"
 					filename = request.args.get('f');
 					if os.path.exists(directory+filename) == True:
 						os.remove(directory+filename)
@@ -264,7 +232,7 @@ def render(artwork, user, path, settings):
 						
 				if path == 'loadcalendar':	
 					calendar = []
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/surfacefuture/"
 					
 					if os.path.exists(directory) == True:
 						listOfFiles = os.listdir(directory)
@@ -281,7 +249,7 @@ def render(artwork, user, path, settings):
 					return jsonify(calendar)
 				
 				if path == 'livesurfaces':
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/live"
 					if not os.path.exists(directory):
 						os.makedirs(directory)
 					
@@ -301,7 +269,7 @@ def render(artwork, user, path, settings):
 						mtime = int(request.args.get('t'))
 					
 					# search calendar based on date time file entries in 
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/surfacefuture/"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/surfacefuture/"
 					lastTime = 0;
 					theFile = "";
 					if os.path.exists(directory) == True:
@@ -346,7 +314,7 @@ def render(artwork, user, path, settings):
 								os.remove(directory + delItem)
 						
 							
-					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/live"
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/live"
 					fileNamePath = directory + "/live.json"
 					if os.path.exists(fileNamePath) == True:
 						mtime = os.path.getmtime(fileNamePath) 
@@ -375,7 +343,7 @@ def render(artwork, user, path, settings):
 			
 			
 			
-			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(artwork.adminID)	+"/bmap/maps"
+			directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(artwork.adminID)	+"/bmap/" + str(artwork.id) + "/maps"
 			if templateData['section'] == "getmapdata":
 			 	fileNamePath = directory + "/bmap.json"
 			 	with open(fileNamePath) as file_:

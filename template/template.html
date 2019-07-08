@@ -19,7 +19,7 @@
   
   
     <nav class="navbar navbar-dark sticky-top bg-dark  p-0" id="mainNav">
-       <div class="text-nowrap" >
+       <div class="text-nowrap menuLeft" >
         <a class="p-3" href="{{tmp.URL}}/cue">
           {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %} <a href="javascript:loadCalendar()" class="p-3">Cue</a>
 
@@ -54,7 +54,7 @@
         
       </div>
 
-        <div class="nav-item text-nowrap">
+        <div class="text-nowrap menuRight">
           <a href="/user/edit_user_profile">{{ tmp.user.email }}</a> &nbsp;
           <a class="p-3" href="/user/sign-out">Sign Out</a>
         </div>
@@ -67,13 +67,8 @@
   	
 	{% if tmp.section == "cue" %}
 	<div class="cueScreenSelector">
-		{% for surface in tmp.surfaces %}
-			
-			<div class="surface" data-surfaceid="{{surface}}" data-surfacetype="" data-surfacelink="" ondrop="drop(event)" ondragover="allowDrop(event)">
-				surface {{ surface }}
-			</div>
-			
-		{% endfor %}
+		
+		<div id="controls">
 		<a href="javascript:preview()" class="btn btn-success float-right">Preview</a>
 		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
 		<a href="javascript:openFuture()" class="btn btn-warning float-right">Set Future</a>
@@ -84,10 +79,27 @@
 			<a href="javascript:setFuture()" class="btn btn-warning float-right">Set Future</a>
 		</div>
 		</div>
+		
 		{% endif %}
 		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
 		 <a href="javascript:setLive()" class="btn btn-danger float-right">Set Live</a>
 		 {% endif %}
+		 </div>
+		 {% for surface in tmp.surfaces %}
+			
+			<div class="surface" id="surface{{surface}}" data-surfaceid="{{surface}}" data-surfacetype="" data-surfacelink="" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="surfaceClick(this)">
+				surface {{ surface }}
+			</div>
+			
+		{% endfor %}
+	</div>
+	<div><div class="p-3"><span class="shaderTitle">Apps</span>
+		</div>
+		<div class="scrolling-wrapper" >
+		{% for app in tmp.apps %}
+			 <div  id="{{app}}" data-filename="{{app}}" data-surfacetype="script" class='appSelector _card' draggable="true" ondragstart="drag(this, event)" onmouseup="loadApp(this)">{{app}}</div>
+		{% endfor %}
+		</div><
 	</div>
 	<div><div class="p-3"><span class="shaderTitle">My Shaders</span>
 		<a href="javascript:newShader()" class="btn btn-sm btn-outline-secondary float-right ml-1">New GLSLShader</a>
@@ -107,7 +119,7 @@
     </div>
     <a href="javascript:destroyIframe();" id="closeIframe" class="btn btn-danger">Close</a>
     <script>
-    
+    assetsURL = "/assets/{{tmp.artwork.id}}/"
     window.addEventListener('load', function() {
     	$(".form_datetime").datetimepicker({format: 'yyyy-mm-dd hh:ii'});
     	
@@ -161,13 +173,17 @@
     		x = {}
     		x.surfaceLink = $(this).attr('data-surfacelink');
     		x.surfaceType = $(this).attr('data-surfacetype');
-    		surfaces.push(x);
+            if(x.surfaceType == "script"){
+                x.appCfg = SURFACES[this.id].appCfg
+            }
+            surfaces.push(x);
     	});
     	
     	jstring = JSON.stringify(surfaces);
     	hash =  window.btoa(jstring)
     	loc = window.location.href.split("/cue")[0]+'/setup#'+hash
-    	
+    	console.log(loc)
+        
     	$('<iframe>', {
    			src: loc,
    			id:  'preview',
@@ -203,16 +219,56 @@
 	function drag(item, ev) {
 		console.log(item, ev)
 	    ev.dataTransfer.setData("text", ev.target.id);
+	    	
 	}
 	
+    //
+    SURFACES = {}
+        
 	function drop(ev) {
 	  ev.preventDefault();
 	  var data = ev.dataTransfer.getData("text");
 	  $(ev.target).attr('data-surfacetype', document.getElementById(data).dataset.surfacetype);
+      $(ev.target).surfacetype = document.getElementById(data).dataset.surfacetype;
 	  $(ev.target).attr('data-surfacelink', data.replace('.png', ''));
-	  $(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
+      SURFACES[ev.target.id] = {}
+      SURFACES[ev.target.id].htmlobj = ev.target;
+	  if(document.getElementById(data).dataset.surfacetype == "script"){
+	  	$(ev.target).text(document.getElementById(data).dataset.filename);
+	  	$(ev.target).css("background-color", '#efefef');
+        scriptLoadingTarget = SURFACES[ev.target.id];
+        loadAppSetupScript(document.getElementById(data).dataset.filename)
+	  }else{
+	  	$(ev.target).css("background-image", 'url(' + document.getElementById(data).src + ')');
+	  }
 	}
+    scriptLoadingTarget = ""
+	scriptLoadingFunctionStart = "";
+    function loadAppSetupScript(scriptfile){
+        scriptLoadingFunctionStart = scriptfile.split(".")[0]
+        scriptURL = assetsURL+ "apps/" + scriptfile
+        $.getScript( scriptURL).done(function() {
+		    eval("scriptLoadingTarget.app = new " + scriptLoadingFunctionStart + "()");
+            scriptLoadingTarget.app.configGUI();
+        }).fail(function() {
+		
+        });
+	}
+        
+    function appSetLoadParamsFromConfig(cfg){
+        scriptLoadingTarget.appCfg = cfg;
+        console.log(scriptLoadingTarget)
+    }
 	
+    function surfaceClick(surface){
+       // console.log(SURFACES[surface.id].appCfg);
+        if(typeof(SURFACES[surface.id]) != 'undefined'){
+            if(typeof(SURFACES[surface.id].app) != 'undefined'){
+                SURFACES[surface.id].app.configGUI(SURFACES[surface.id].appCfg);
+            }
+        }
+    }
+        
 	currentCalendar = []
 	function loadCalendar(){
 		loc = window.location.href.split("/cue")[0]+'/loadcalendar';
@@ -311,6 +367,7 @@
           
       </main>-->
     {% endif %}
+        <!--
 	{% if tmp.section == "stream" %}
 		<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
 			<h2>New Stream</H2>
@@ -366,7 +423,7 @@
           </div>
 	 </main>
 	 {% endif %}
-        
+        -->
       </div>
     </div>
 

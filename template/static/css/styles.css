@@ -354,8 +354,21 @@ body {
 	margin: 10px;
 	background: #222;
 	padding:10px;
-	color:#ddd;
+	color:#bbb;
 	background-size: cover;
+	text-align: center;
+	text-transform: capitalize;
+}
+.appSelector{
+    width: 200px;
+    height: 130px;
+    background-color: white;
+    border-radius: 5px;
+    text-align: center;
+    padding-top: 10px;
+    font-size: 20px;
+	margin: 10px;
+	border:1px solid black;
 }
 .shaderSelector{
 	width: 200px;
@@ -364,7 +377,128 @@ body {
 	border-radius : 5px;
 	display:inline-block;
 	margin: 10px;
-	
+}
+
+@media (max-width: 575px) {  
+	.appSelector{
+    	width: 83px;
+    	height: 60px;
+    	font-size: 12px;
+		margin: 10px;
+		font-size: 16px;
+		margin-right: 0px;
+	}
+	.shaderSelector{
+		width: 83px;
+		height: 60px;
+		margin: 10px;
+		margin-right: 0px;
+	}
+	.surface{
+		width: 83px;
+		height: 60px;
+		margin: 5px;
+		background: #222;
+		padding:10px;
+		font-size:10px;
+		margin-right: 0px;
+	}
+	.btn{
+    	padding: 5px;
+    	font-size: 13px;
+	}
+	.menuRight{
+		display: block;
+    	width: 100%;
+    	text-align: right;
+    	position: fixed;
+    	top: 0px;
+    	background: #111;
+	}
+	.menuLeft{
+		margin-top:20px;
+	}
+}
+
+
+
+@media  (max-width: 991px) { 
+	.appSelector{
+    	width: 120px;
+    	height: 80px;
+    	font-size: 12px;
+		margin: 10px;
+		font-size: 14px;
+		margin-right: 0px;
+	}
+	.shaderSelector{
+		width: 120px;
+		height: 80px;
+		margin: 10px;
+		margin-right: 0px;
+	}
+	.surface{
+		width: 130px;
+		height: 90px;
+		margin: 5px;
+		background: #222;
+		padding:10px;
+		font-size:10px;
+		margin-right: 0px;
+	}
+	.btn{
+    	//padding: 10px;
+    	//font-size: 16px;
+	}
+	.menuRight{
+		display: block;
+    	width: 100%;
+    	text-align: right;
+    	position: fixed;
+    	top: 0px;
+    	background: #111;
+	}
+	.menuLeft{
+		margin-top:20px;
+	}	
+}
+
+
+@media  (max-width: 1199px) { 
+	.appSelector{
+    	width: 140px;
+    	height: 95px;
+    	font-size: 12px;
+		margin: 10px;
+		font-size: 14px;
+		margin-right: 0px;
+	}
+	.shaderSelector{
+		width: 140px;
+		height: 95px;
+		margin: 10px;
+		margin-right: 0px;
+	}
+	.surface{
+		width: 150px;
+		height: 100px;
+		margin: 5px;
+		background: #222;
+		padding:10px;
+		font-size:18px;
+		margin-right: 0px;
+	}
+
+}
+
+
+// Extra large devices (large desktops, 1200px and up)
+@media (min-width: 1200px) { ... }
+
+#controls{
+	background-color: rgb(68, 68, 68);
+    display: block;
+    overflow: hidden;
 }
 
 .cueScreenSelector{
@@ -375,7 +509,6 @@ body {
 
 .cueScreenSelector a{
 	margin:5px;
-	margin-top:10px;
 }
 
 #preview{

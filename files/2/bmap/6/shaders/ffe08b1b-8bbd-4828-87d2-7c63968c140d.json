@@ -1,0 +1,52 @@
+// raymarch in 5 minth
+// FMS_Cat, MIT License
+
+#ifdef GL_ES
+precision highp float;
+#endif
+
+#extension GL_OES_standard_derivatives : enable
+
+uniform float time;
+uniform vec2 mouse;
+uniform vec2 resolution;
+
+float distFunc( vec3 p ) {
+	vec3 _p = mod( p, 1.0 ) - 0.5;
+	return length( _p ) - 0.3 * abs(sin(time));
+}
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+vec3 normalFunc( vec3 p ) {
+	vec2 d = vec2( 0.0, 1E-4 );
+	return normalize( vec3(
+		distFunc( p + d.yxx ) - distFunc( p - d.yxx ),
+		distFunc( p + d.xyx ) - distFunc( p - d.xyx ),
+		distFunc( p + d.xxy ) - distFunc( p - d.xxy )
+	) );
+}
+
+void main( void ) {
+	vec2 p = ( gl_FragCoord.xy * 2.0 - resolution.xy ) / resolution.y;
+	
+	vec3 rayOri = vec3( 0.0, 0.0, 5.0 );
+	vec3 rayDir = normalize( vec3( p.xy, -1.0 ) );
+	float rayLen = 0.01;
+	vec3 rayPos = rayOri + rayDir * rayLen;
+	float dist = 0.0;
+	
+	for ( int i = 0; i < 50; i ++ ) {
+		dist = distFunc( rayPos );
+		rayLen += 0.8 * dist;
+		rayPos = rayOri + rayDir * rayLen + sin(time) * 1.3 + rand(p)/100.;
+	}
+	
+	if ( dist < 0.01 ) {
+		vec3 normal = normalFunc( rayPos );
+		gl_FragColor = vec4( .5 + 0.5 * normal * abs(sin(time)), 1.0 );
+		return;
+	}
+
+	gl_FragColor = vec4( 0.0, 0.0, 0.0, 1.0 );
+}

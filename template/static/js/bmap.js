@@ -912,7 +912,8 @@ bmap = function(){
 	mapStart = mapStart + 30
 	this.frustPos = new THREE.Vector3(mapStart,-(height/2),width);
 	this.frustRotation = new THREE.Vector3(20,10,0);
-	
+	this.scriptApp = {};
+    this.surfaceType = "";
 	this.frustH = this.frustPlane * Math.sin(THREE.Math.degToRad(this.frustFOV * 0.5));
 	this.frustW = this.frustH * this.frustRatio;
 	this.frustPoints = [
@@ -1204,34 +1205,19 @@ bmap = function(){
 		
 		this.startTime = Date.now();
 		
-		//this.xshaderMaterial.extensions.derivatives = true;
-		//this.xshaderMaterial.extensions.fragDepth = true;
-		//this.xshaderMaterial.extensions.drawBuffers = true;
-		//this.xshaderMaterial.extensions.shaderTextureLOD = true;
-		
-		
 		this.scene = new THREE.Scene();
 		this.scene.background = new THREE.Color( 0x000000 );
 		this.plane = new THREE.PlaneBufferGeometry( width, height );
-		
-		
 		this.planeMaterial = new THREE.MeshBasicMaterial({color:0x000000})
 		this.quad = new THREE.Mesh( this.plane, this.xshaderMaterial); //this.planeMaterial );
-		
-		//this.quad.position.z = -100;
-		//this.plane.computeVertexNormals();
 		this.scene.add( this.quad );
-		
-		// scene.add( this.quad );
-		// attach the rt to original material
-		this.ProjectionMaterial.uniforms.texture.value = this.rtTexture.texture
-		this.ProjectionMaterial.needsUpdate = true
+		this.ProjectionMaterial.uniforms.texture.value = this.rtTexture.texture;
+		this.ProjectionMaterial.needsUpdate = true;
 	}
 	this.renderShaderToTextureAnimate = function(){
 		//audioAnalyser.getByteTimeDomainData(audioDataArray);
-		this.uniforms.audioFFT.value = audioDataArray
-	
-		this.uniforms.mouse.value.x = mouse.x
+		this.uniforms.audioFFT.value = audioDataArray;
+	    this.uniforms.mouse.value.x = mouse.x
 		this.uniforms.mouse.value.y = mouse.y
 		var elapsedMilliseconds = Date.now() - this.startTime;
 		var elapsedSeconds = elapsedMilliseconds / 1000.;
@@ -1240,9 +1226,15 @@ bmap = function(){
 		renderer.context.getExtension('OES_standard_derivatives');
 		renderer.render( this.scene, this.cameraRTT, this.rtTexture );
 		this.texture = this.rtTexture
-		this.rtTexture.needsUpdate = true
+        this.rtTexture.needsUpdate = true
 		
 	}
+    this.renderScriptToTextureAnimate = function(){
+        
+        this.texture = this.scriptApp.renderTexture();   
+        this.ProjectionMaterial.uniforms.texture.value = this.texture;
+		this.texture.needsUpdate = true;
+    }
 	return this;
 }
 
@@ -1382,9 +1374,14 @@ animate = function () {
 			$("#bMapGuiProjectorTools").hide()
 			$("#bLightGui").hide()
 			for(a=0;a<maps.length;a++){
-				if(typeof(maps[a].rtTexture) != "undefined" ){	
-					maps[a].renderShaderToTextureAnimate()
-				}
+                if(maps[a].surfaceType == "script"){
+                    maps[a].renderScriptToTextureAnimate()
+                }
+                if(maps[a].surfaceType == "shader"){
+				    if(typeof(maps[a].rtTexture) != "undefined" ){	
+					   maps[a].renderShaderToTextureAnimate()
+				    }
+                }
 			}
 		}
 		
@@ -1519,23 +1516,51 @@ function surfacesLoad(){
 	url = previewSurfaces[previewSurfaceID].surfaceLink
 	if(previewSurfaces[previewSurfaceID].surfaceType == "shader"){
 		url = _url + "loadshader?h=" + url;
-	}
-	$.getJSON( url, function( data ) {
-		previewSurfaces[previewSurfaceID].code = data.code;
-		previewSurfaceID++
-		if(previewSurfaceID != previewSurfaces.length){
-			surfacesLoad();
-		}else{
-			surfacesToMaterial();
-		}
-	});
+        $.getJSON( url, function( data ) {
+            previewSurfaces[previewSurfaceID].code = data.code;
+            previewSurfaceID++
+            if(previewSurfaceID != previewSurfaces.length){
+                surfacesLoad();
+            }else{
+                surfacesToMaterial();
+            }
+        });
+    }
+    if(previewSurfaces[previewSurfaceID].surfaceType == "script"){
+        console.log(previewSurfaceID, "appScripttoTextureStartup")
+        
+        scriptURL = ASSETURL + "apps/" + previewSurfaces[previewSurfaceID].surfaceLink;
+        
+        scriptLoadingFunctionStart = previewSurfaces[previewSurfaceID].surfaceLink.split(".")[0]
+        
+        $.getScript( scriptURL).done(function() {
+		    eval("previewSurfaces[previewSurfaceID].app = new " + scriptLoadingFunctionStart + "()");
+            previewSurfaces[previewSurfaceID].app.init(previewSurfaces[previewSurfaceID].appCfg);
+            
+            previewSurfaceID++
+            if(previewSurfaceID != previewSurfaces.length){
+                surfacesLoad();
+            }else{
+                surfacesToMaterial();
+            }
+        }).fail(function() {
+		
+        });
+    }
 }
-
+scriptLoadingFunctionStart = "";
 
 function surfacesToMaterial(){
 	for(a=0;a<maps.length;a++){
 		//console.log(previewSurfaces[a].code)
-		maps[a].renderShaderToTextureSetup(previewSurfaces[a].code)
+        maps[a].surfaceType = previewSurfaces[a].surfaceType;
+        if(previewSurfaces[a].surfaceType == "script"){
+            maps[a].scriptApp = previewSurfaces[a].app;
+        }
+        if(previewSurfaces[a].surfaceType == "shader"){
+            maps[a].renderShaderToTextureSetup(previewSurfaces[a].code)
+        }
+		
 	}
 }
 lastdata = ""
@@ -1735,6 +1760,7 @@ function drawScene(){
 		clr.setRGB( c[i][0], c[i][1], c[i][2]);
 		pointsBufferGeometry.attributes.color.setXYZ( i, clr.r, clr.g, clr.b );
 	}
+	
 	
 	pointsBufferGeometry.addAttribute( 'color', new THREE.BufferAttribute( colorz, 3 ) );
 	pointsBufferGeometry.name = "pointsBufferGeometery";

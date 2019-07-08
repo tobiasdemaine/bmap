@@ -15,7 +15,7 @@ an artSite plugin tool for creating augmented projection installations in a webG
 	* delete polygon 
 	* select map
 	* delete map
-	* project and adjust frustrum for texture projection	
+	* project and adjust frustum for texture projection	
 
 * pivot world around object on cam 
 
@@ -25,6 +25,8 @@ an artSite plugin tool for creating augmented projection installations in a webG
 	* projection position
 
 * select Fullscreen
+
+-- make a cycling of shaders option in admin
 
 	
 
