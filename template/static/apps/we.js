@@ -6,8 +6,8 @@ var we = function() {
 		this.longitude = data.longitude; 
 		this.halfBoundKm = data.halfBoundKm;
 	
-		this.width = 512;
-		this.height = 512;
+		this.width = 1024;
+		this.height = 768;
 	
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderTarget = new THREE.WebGLRenderTarget(this.width, this.height); // texture size
@@ -15,7 +15,7 @@ var we = function() {
 		this.scene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera( 45, this.width / this.height, 1, 1000 );
 		this.scene.add(this.camera)
-        this.camera.position.set(0,0,250)
+        this.camera.position.set(0,0,255)
 		this.camera.lookAt(0,0,0)
 		this.ambientLight = new THREE.AmbientLight( 0x555555 ) 
 		this.scene.add(this.ambientLight );
@@ -25,10 +25,10 @@ var we = function() {
         this.models = {}
 	    this.getFileList()
 		this.cameraPositions = []
-		this.cameraPositions.push(new THREE.Vector3(0,0,250));
-		this.cameraPositions.push(new THREE.Vector3(0,50,250));
-		this.cameraPositions.push(new THREE.Vector3(50,0,250));
-		this.cameraPositions.push(new THREE.Vector3(-50,0,250));
+		this.cameraPositions.push(new THREE.Vector3(0,0,255));
+		this.cameraPositions.push(new THREE.Vector3(0,50,255));
+		this.cameraPositions.push(new THREE.Vector3(50,0,255));
+		this.cameraPositions.push(new THREE.Vector3(-50,0,255));
 		this.scene.background = new THREE.Color( 0x000000 );
 		this.cameraTween();
         // start loading model
@@ -70,8 +70,7 @@ var we = function() {
 	this.cameraTween=function(){
 		this.cameraPosition = this.cameraPositions[ Math.floor(this.cameraPositions.length * Math.random()) ]
 		var that = this;
-  		console.log(this.cameraPosition )
-		this.tween = new TWEEN.Tween( this.camera.position )
+  		this.tween = new TWEEN.Tween( this.camera.position )
 		.to( {
 			x: this.cameraPosition.x,
 			y: this.cameraPosition.y,

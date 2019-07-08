@@ -122,7 +122,6 @@
     assetsURL = "/assets/{{tmp.artwork.id}}/"
     window.addEventListener('load', function() {
     	$(".form_datetime").datetimepicker({format: 'yyyy-mm-dd hh:ii'});
-    	
     });
     
     function setFuture(){
@@ -153,6 +152,9 @@
     		x = {}
     		x.surfaceLink = $(this).attr('data-surfacelink');
     		x.surfaceType = $(this).attr('data-surfacetype');
+			if(x.surfaceType == "script"){
+                x.appCfg = SURFACES[this.id].appCfg
+            }
     		surfaces.push(x);
     	});
 		jstring = JSON.stringify(surfaces);
@@ -340,6 +342,9 @@
     		x = {}
     		x.surfaceLink = $(this).attr('data-surfacelink');
     		x.surfaceType = $(this).attr('data-surfacetype');
+			if(x.surfaceType == "script"){
+                x.appCfg = SURFACES[this.id].appCfg
+            }
     		surfaces.push(x);
     	});
 		jstring = JSON.stringify(surfaces);

@@ -842,8 +842,6 @@ bMapGui = function(){
     	maps[currentBmap].objControl.setMode( 'scale' );
     }).appendTo("#bMapGuiProjectorTools");
     
-    
-    
     $('#bMapGuiProjectorTools').hide();
     
     $("#bMapGuiProjectorTools input").focus(function(){ 
@@ -1390,11 +1388,21 @@ animate = function () {
 			$("#bMapGuiProjectorTools").hide()
 			$("#bLightGui").hide()
 			for(a=0;a<maps.length;a++){
-				if(typeof(maps[a].rtTexture) != "undefined" ){	
+				/*if(typeof(maps[a].rtTexture) != "undefined" ){	
 					maps[a].renderShaderToTextureAnimate()
 					maps[a].unfocus()
 					
-				}
+				}*/
+				if(maps[a].surfaceType == "script"){
+                    maps[a].renderScriptToTextureAnimate()
+					maps[a].unfocus()
+                }
+                if(maps[a].surfaceType == "shader"){
+				    if(typeof(maps[a].rtTexture) != "undefined" ){	
+					   maps[a].renderShaderToTextureAnimate()
+					   maps[a].unfocus()
+				    }
+                }
 			}
 		}
 		
@@ -1514,6 +1522,7 @@ function surfacesLoad(){
 	ur = theURL.split("/").reverse()
 	_url = "/" + ur[2] + "/" + ur[1] + "/";
 	url = previewSurfaces[previewSurfaceID].surfaceLink
+	
 	if(previewSurfaces[previewSurfaceID].surfaceType == "shader"){
 		url = _url + "loadshader?h=" + url;
         $.getJSON( url, function( data ) {
@@ -1534,6 +1543,7 @@ function surfacesLoad(){
         scriptLoadingFunctionStart = previewSurfaces[previewSurfaceID].surfaceLink.split(".")[0]
         
         $.getScript( scriptURL).done(function() {
+			//console.log("surface")
 		    eval("previewSurfaces[previewSurfaceID].app = new " + scriptLoadingFunctionStart + "()");
             previewSurfaces[previewSurfaceID].app.init(previewSurfaces[previewSurfaceID].appCfg);
             
@@ -1574,6 +1584,7 @@ function loadLiveSurfaces(){
 			lastdata = JSON.stringify(data);
 			previewSurfaceID = 0
 			previewSurfaces = data;
+			console.log(previewSurfaces)
 			surfacesLoad()
 			// set tieoiut
 		}
