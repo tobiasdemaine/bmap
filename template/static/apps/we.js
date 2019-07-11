@@ -205,6 +205,23 @@ var we = function() {
 				halfBoundKm: this.halfBoundKm } 
 		var that = this;
 		$.getJSON( facelisturl, data).done(function( files ) {
+			var keys = Object.keys(that.models)
+			out = keys.length
+			
+			if(keys.length >= 100){
+				// purg keys down to 75
+				out = keys.length - 75
+				for(i=0; i < out; i++){
+					
+					if(that.models[keys[i]].mesh.uuid == that.currentMesh.uuid){
+						out++;
+					}else if(that.models[keys[i]].mesh.uuid == that.morphTarget.uuid){
+						out++;
+					}else{
+						delete that.models[keys[i]];
+					}
+				}
+			}
             for(e in files){
 		  		isNew = true;
 				for(z in that.models){
@@ -222,7 +239,7 @@ var we = function() {
 		    var err = textStatus + ", " + error;
 		    console.log( "Request Failed: " + err );
 		});
-		setTimeout(this.getFileList.bind(this), (60000*5));
+		setTimeout(this.getFileList.bind(this), (60000*2));
 	}
 	
 	

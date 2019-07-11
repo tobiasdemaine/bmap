@@ -221,7 +221,6 @@
 	function drag(item, ev) {
 		console.log(item, ev)
 	    ev.dataTransfer.setData("text", ev.target.id);
-	    	
 	}
 	
     //
@@ -264,8 +263,10 @@
 	
     function surfaceClick(surface){
        // console.log(SURFACES[surface.id].appCfg);
+		 scriptLoadingTarget = SURFACES[surface.id];
         if(typeof(SURFACES[surface.id]) != 'undefined'){
             if(typeof(SURFACES[surface.id].app) != 'undefined'){
+				console.log(">>>V>", SURFACES[surface.id].appCfg)
                 SURFACES[surface.id].app.configGUI(SURFACES[surface.id].appCfg);
             }
         }
