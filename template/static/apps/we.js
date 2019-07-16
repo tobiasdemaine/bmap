@@ -107,8 +107,6 @@ var we = function() {
 				this.morphTarget = this.models[rand].mesh
     			this.morphTarget.visible = false;
 				this.morphTarget.geometry.verticesNeedUpdate = true;
-
-
 			}
 		}
 		if(this.currentMesh != false){
@@ -120,15 +118,13 @@ var we = function() {
 					this.shaderMaterial.uniforms.texture1.value = this.morphTarget.material.map;
 					this.shaderMaterial.uniforms.step.value = 0
 					this.shaderMaterial.needsUpdate = true;
-					
 					this.workerMesh.geometry = this.currentMesh.geometry
 					this.workerMesh.material.map = this.currentMesh.material.map
 				}
 				this.shaderMaterial.uniforms.step.value = this.morphStep
 				this.shaderMaterial.needsUpdate = true;
 				renderer.render(this.scene, this.camera, this.renderTarget);
-				this.morphStep = this.morphStep + 0.1
-				
+				this.morphStep = this.morphStep + 0.05
 				if(this.morphStep >= 1){
 					this.morphStep = 0
 					this.currentMesh.visible=false;
@@ -141,7 +137,6 @@ var we = function() {
 				}	
 			}
 		}
-		
         TWEEN.update();
         return this.renderTarget;
 	}
