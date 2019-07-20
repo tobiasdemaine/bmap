@@ -3,6 +3,15 @@ body {
   background: #111;
 }
 
+@import url(https://fonts.googleapis.com/css?family=Roboto:300,400);
+body {
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  background: #111;
+  font-family: 'Roboto', sans-serif !important;
+  font-size: 1em;
+}
 .shaderTitle{
 	color: #efefef;
 }
@@ -363,6 +372,7 @@ body {
     width: 200px;
     height: 130px;
     background-color: white;
+	color:black;
     border-radius: 5px;
     text-align: center;
     padding-top: 10px;
@@ -598,4 +608,47 @@ body {
 	z-index: 1102;
 	background: black;
 	width:600px;
+}
+
+.modal-backdrop{
+	z-index:1000!important;
+	
+}
+.playListItemOrder{
+	width:40px;
+	display: inline-block;
+}
+.playListAppItem{
+	width:70px;
+	height:50px;
+	border-radius: 5px;
+	background-color: white;
+	text-align: center;
+    padding-top: 10px;
+    font-size: 14px;
+	margin: 5px;
+	border:1px solid black;
+	display:inline-block;
+	vertical-align: top;
+}
+.playListShaderItem{
+	width:70px;
+	height:50px;
+	margin: 5px;
+	border:1px solid black;
+	border-radius: 5px;
+}
+.playListItemSelect{
+	display:block;
+	clear: both;
+	padding:10px;
+	border-bottom: 1px solid silver;
+	font-size: 20px;
+}
+#listOfPlayLists{
+    clear: both;
+    padding-top: 10px;
+}
+.defaultPlaylist{
+	background-color: #0d0e0d;
 }

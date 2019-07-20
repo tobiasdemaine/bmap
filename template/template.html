@@ -9,7 +9,7 @@
 
     <title>{{ tmp.artwork.name }}</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css//bootstrap.min.css" >
     <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css/styles.css" >
     <link rel="stylesheet" href="/assets/{{tmp.artwork.id}}/css/bootstrap-datetimepicker.min.css" >
     
@@ -21,37 +21,256 @@
     <nav class="navbar navbar-dark sticky-top bg-dark  p-0" id="mainNav">
        <div class="text-nowrap menuLeft" >
         <a class="p-3" href="{{tmp.URL}}/cue">
-          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %} <a href="javascript:loadCalendar()" class="p-3">Cue</a>
+          {{ tmp.artwork.name }}</a>  {% if(tmp.user.permission == "Admin") %}<a href="{{tmp.URL}}/setup">Scene</a>{% endif %} <!-- <a href="javascript:loadCalendar()" class="p-3">Cue</a> -->
+		  {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
+		  <a href="javascript:playListDialog()" class="p-3">Play Lists</a>
+		   <div class="modal fade" id="playlists" tabindex="-1" role="dialog" aria-labelledby="modalLongTitle" aria-hidden="true">
+			  <div class="modal-dialog modal-dialog-centered" role="document">
+				<div class="modal-content">
+				  <div class="modal-header">
+					<h5 class="modal-title" id="modalLongTitle">Play Lists</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					  <span aria-hidden="true">&times;</span>
+					</button>
+				  </div>
+				  <div class="modal-body">
+					<div id="addEditPlayList">
+						<label for="playListName">Play List Name</label>
+						<div class="input-group mb-3">
+						  <input  id="playListName" type="text" class="form-control" placeholder="Playlist Name" aria-label="Playlist Name" aria-describedby="basic-addon2">
+						  <div class="input-group-append">
+							<button id="addEditPlayListButton" class="btn btn-outline-secondary" type="button"onclick="addNewPlayList($('#playListName').val())">Add PlayList</button>
+						  </div>
+						</div>
+					</div>
+					<div id="playListLists">
+						<a class="btn btn-primary float-right  btn-sm" id="addNewPlayListButton" href="javascript:newPlayList()" role="button">New Play List</a>
+						<div id="listOfPlayLists">
+							
+						</div>
+					</div>
+					<div id="playListEditor">
+						<div id="playListEditorSurfaces">
+						</div>
+					</div>
+				  </div>
+				</div>
+			  </div>
+			</div>
+		   	<script>
+			playLists = []
+			function playListDialog(){
+				$("#playListEditor").hide();
+				$("#addEditPlayList").hide();
+				$("#playListLists").show();
+				$('#playlists').modal('show');
+				$('#addNewPlayListButton').show()
+				$("#listOfPlayLists").html("<center>Loading..</center>")
+				url = window.location.href.split("/cue")[0]+'/getplaylists';
+				$.getJSON(url).done(function(dataObj){
+					$("#listOfPlayLists").html("");
+					playLists = [];
+					for(x in dataObj){
+						playLists.push(dataObj[x])
+						$("#listOfPlayLists").append( "<div class=\"playListItemSelect\"><a href=\"javascript:getPlayList('" + dataObj[x] + "')\">"+ dataObj[x] + "</a><a class=\"btn btn-warning float-right  btn-sm\" href=\"javascript:SetDefaultPlayList('"+dataObj[x]+"')\">Set Default</a> <a class=\"btn btn-danger float-right  btn-sm\" style=\"margin-right:5px;\" href=\"javascript:deletePlayList('"+dataObj[x]+"')\">Delete</a></div>");
+					}
+					getDefaultPlayList()
+				});
+			}
+			function getDefaultPlayList(){
+				url = window.location.href.split("/cue")[0]+'/getdefaultplaylist';
+				$.getJSON(url).done(function(dataObj){
+					$(".playListItemSelect a").each(function(){
+						console.log($(this).text(), dataObj.defalutPlayList)
+						if($(this).text() == dataObj.defalutPlayList){
+							$(this).parent().addClass('defaultPlaylist')
+							$(this).parent().find(".btn").each(function(){
+								$(this).remove()
+							});
+						}
+					});
+				});
+			}
+			function deletePlayList(playListName){
+				if(confirm("Are you sure you want to delete te playlist : " + playListName + "?")){
+					url = window.location.href.split("/cue")[0]+'/deleteplaylist';
+					data = { list : playListName }
+					$.getJSON(url, data).done(function(playList){
+						playListDialog();
+					});
+				}
+			}
+			currentPlayList = [];
+			function getPlayList(playListName){
+				url = window.location.href.split("/cue")[0]+'/getplaylist';
+				data = { list : playListName }
+				$.getJSON(url, data).done(function(playList){
+					currentPlayList = playList;
+					$("#playListEditor").show();
+					$("#addEditPlayList").hide();
+					$("#playListLists").hide();
+					renderEditPlayList(playList)
+				});
+			}	
+			function renderEditPlayList(playList){
+				$("#playListEditorSurfaces").html("");
+				for(x in playList.playItem){
+					playListItem = "";
+					for(z in playList.playItem[x]){
+						if(playList.playItem[x][z].surfaceType == "shader"){
+							url = window.location.href.split("/cue")[0];
+							playListItem = playListItem  + "<img src='" + url + '/shaderimg?i=' + playList.playItem[x][z].surfaceLink + ".png' class='playListShaderItem' />"
+						}
+						if(playList.playItem[x][z].surfaceType == "script"){
+							url = window.location.href.split("/cue")[0];
+							playListItem = playListItem  + "<div class='playListAppItem'>" + playList.playItem[x][z].surfaceLink + "</div>"
+						}
+					}
+					
+					if(x > 0){
+						upList = "<a href='javascript:swapList("+x+", "+(x-1)+")'>&#8679;</a>"	
+					}else{
+						upList = "";
+					}
+					if(x < playList.playItem.length-1){
+						downList = "<a href='javascript:swapList("+x+", "+(parseInt(x)+1)+")'>&#8681;</a>"	
+					}else{
+						downList = ""
+					}
+					jstring = JSON.stringify( playList.playItem[x]);
+					hash =  window.btoa(jstring)
+					$("#playListEditorSurfaces").append("<div><div class='playListItemOrder'>" + upList +" "+ downList + "</div>" + playListItem + "<a href='javascript:removeFromList(" + x + ")'>&#9746;</a> <a href=\"javascript:previewSurfaceFromPlayList('"+hash+"');\">&#x25ba;</a></div>");
+				}
+			}
+			function previewSurfaceFromPlayList(hash){
+				loc = window.location.href.split("/cue")[0]+'/setup#'+hash
+				$('<iframe>', {
+					src: loc,
+					id:  'preview',
+					frameborder: 0,
+					scrolling: 'no'
+				}).appendTo('body');
 
+				$("#closeIframe").fadeIn();
+			}
+				
+			function removeFromList(item){
+				if(confirm("Are you sure you want to remove this scene from this playlist?")){
+					currentPlayList.playItem.splice(item, 1);
+					renderEditPlayList(currentPlayList)
+					savePlayListBackground(currentPlayList)
+				}
+			}
+			function swapList(item, swapItem){
+				console.log(currentPlayList.playItem[swapItem])
+				var b = currentPlayList.playItem[item];
+				currentPlayList.playItem[item] = currentPlayList.playItem[swapItem];
+				currentPlayList.playItem[swapItem] = b;
+				
+				renderEditPlayList(currentPlayList)
+				savePlayListBackground(currentPlayList)
+			}
+			function newPlayList(){
+		   	   $("#playListEditor").hide();
+			   $("#playListLists").hide();
+			   $("#addEditPlayList").show();
+			   $("#playListName").val("");
+		   }
+		   
+			function addNewPlayList(playListName){
+				// creates new playlist
+				playList = { title : playListName, playItem:[]}
+				savePlayList(playList);
+			}
+				
+			function addTooPlayList(playListName){
+				// creates new playlist
+				playList = { title : playListNamem, playItem:[]}
+				savePlayList(playList);
+			}
+				
+				
+			function savePlayList(playList){
+				url = window.location.href.split("/cue")[0]+'/saveplaylist';
+				data = { list : JSON.stringify(playList) }
+				$.post(url, data).done(function(){
+					console.log("Play List Saved")
+					playListDialog()
+				});
+			}
+			
+			function savePlayListBackground(playList){
+				url = window.location.href.split("/cue")[0]+'/saveplaylist';
+				data = { list : JSON.stringify(playList) }
+				$.post(url, data).done(function(){
+					console.log("Play List Saved")
+				});
+			}
+				
+			function SetDefaultPlayList(playListName){
+				data = {list:playListName}
+				url = window.location.href.split("/cue")[0]+'/defaultplaylist';
+				$.getJSON(url, data).done(function(data){
+					playListDialog()
+				});
+				
+			}
+				
+			function addFilesToPlayList(playListName){
+				url = window.location.href.split("/cue")[0]+'/getplaylist';
+				data = {list:playListName}
+				$.getJSON(url, data).done(function(playList){
+					surfaces = []
+					surfaceCount = 0;
+					$(".surface").each(function(){
+						x = {}
+						surfaceCount++;
+						x.surfaceLink = $(this).attr('data-surfacelink');
+						console.log(x.surfaceLink)
+						x.surfaceType = $(this).attr('data-surfacetype');
+						if(x.surfaceType == "script"){
+							x.appCfg = SURFACES[this.id].appCfg
+						}
+						if(x.surfaceType != ""){
+							surfaces.push(x);
+						}
+						
+					});
+					if(surfaces.length == surfaceCount){
+						playList.playItem.push(surfaces);
+						savePlayList(playList);
+						$('#playlists').modal('hide');
+					}else{
+						alert('Not all Surfaces are filled with Apps or Shaders')
+					}
+					
+				});
+			}
+				
+			function addToPlayList(){
+				$("#playListEditor").hide();
+				$('#addNewPlayListButton').hide()
+				$("#addEditPlayList").hide();
+				$("#playListLists").show();
+				$('#playlists').modal('show');
+				// load the playlist in from the server
+				$("#listOfPlayLists").html("<center>Loading..</center>")
+				url = window.location.href.split("/cue")[0]+'/getplaylists';
+				$.getJSON(url).done(function(dataObj){
+					$("#listOfPlayLists").html("");
+					playLists = [];
+					for(x in dataObj){
+						playLists.push(dataObj[x])
+						$("#listOfPlayLists").append( "<div><a href=\"javascript:addFilesToPlayList('" + dataObj[x] + "');\">" + dataObj[x] + "</div>");
+					}
+				});
+			}
+				
+			
+		   </script>
         
-       <!--  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-          <ul class="nav flex-column">
-          	  {% if(tmp.user.permission == "Admin") %}
-              <li class="nav-item">
-                <a class="nav-link {% if tmp.section == 'scene' %}active{% endif %}" href="{{tmp.URL}}/setup">
-                  Scene
-                </a>
-              </li>
-              {% endif %}
-              {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
-              <li class="nav-item">
-                <a class="nav-link {% if tmp.section == 'que' %}active{% endif %}"  href="{{tmp.URL}}/cue">
-                  Content & Cue
-                </a>
-              </li>
-              {% endif %}
-	      <li class="nav-item ">
-                <a class="nav-link {% if tmp.section == 'content' %}active{% endif %}"  href="{{tmp.URL}}/content">
-                  My Content
-                </a>
-              </li>
-	      <li class="nav-item ">
-                <a class="nav-link "  href="#">
-                  {{ tmp.user.email }}
-                </a>
-              </li>
-            </ul> -->
-        
+     		{% endif %}
+		   
       </div>
 
         <div class="text-nowrap menuRight">
@@ -70,20 +289,9 @@
 		
 		<div id="controls">
 		<a href="javascript:preview()" class="btn btn-success float-right">Preview</a>
-		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
-		<a href="javascript:openFuture()" class="btn btn-warning float-right">Set Future</a>
-		<div id="futureDateTimeWrap">
-		<div id="futureDateTime">
-			<input size="26" type="text" value="" id="futureDateTimeInput" readonly class="form-control form_datetime">
-			<a href="javascript:closeFuture()" class="btn btn-danger">Cancel</a>
-			<a href="javascript:setFuture()" class="btn btn-warning float-right">Set Future</a>
-		</div>
-		</div>
-		
+		{% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
+		<a href="javascript:addToPlayList()" class="btn btn-warning float-right">Add to Playlist</a>
 		{% endif %}
-		 {% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
-		 <a href="javascript:setLive()" class="btn btn-danger float-right">Set Live</a>
-		 {% endif %}
 		 </div>
 		 {% for surface in tmp.surfaces %}
 			
@@ -93,14 +301,16 @@
 			
 		{% endfor %}
 	</div>
+	{% if(tmp.user.permission == "Admin" or tmp.user.permission == "MemberPaid") %}
 	<div><div class="p-3"><span class="shaderTitle">Apps</span>
 		</div>
 		<div class="scrolling-wrapper" >
 		{% for app in tmp.apps %}
 			 <div  id="{{app}}" data-filename="{{app}}" data-surfacetype="script" class='appSelector _card' draggable="true" ondragstart="drag(this, event)" onmouseup="loadApp(this)">{{app}}</div>
 		{% endfor %}
-		</div><
+		</div>
 	</div>
+	{% endif %}
 	<div><div class="p-3"><span class="shaderTitle">My Shaders</span>
 		<a href="javascript:newShader()" class="btn btn-sm btn-outline-secondary float-right ml-1">New GLSLShader</a>
         <!-- <a href="{{tmp.URL}}/stream" class="btn btn-sm btn-outline-secondary float-right">New Stream</a> -->
@@ -120,52 +330,21 @@
     <a href="javascript:destroyIframe();" id="closeIframe" class="btn btn-danger">Close</a>
     <script>
     assetsURL = "/assets/{{tmp.artwork.id}}/"
-    window.addEventListener('load', function() {
-    	$(".form_datetime").datetimepicker({format: 'yyyy-mm-dd hh:ii'});
-    });
+  
+	function loadingShow(){
+				
+	}
+	function loadingHide(){
+				
+	}
     
-    function setFuture(){
-    	$('#futureDateTimeWrap').fadeOut();
-    	futureTime = $(".form_datetime").val()
-    	tmLoc = new Date(futureTime);
-    	console.log(tmLoc.getTime());
-    	surfaceSaveFutureDate(tmLoc.getTime())
-    }
-    
-    function closeFuture(){
-    	$('#futureDateTimeWrap').fadeOut();
-    }
-    
-     function openFuture(){
-     	$(".form_datetime").val('')
-    	$('#futureDateTimeWrap').fadeIn();
-    }
-    
+
     function destroyIframe(){
     	$("#preview").remove();
     	$("#closeIframe").fadeOut();
     }
     
-    function setLive(){
-    	surfaces = []
-    	$(".surface").each(function(){
-    		x = {}
-    		x.surfaceLink = $(this).attr('data-surfacelink');
-    		x.surfaceType = $(this).attr('data-surfacetype');
-			if(x.surfaceType == "script"){
-                x.appCfg = SURFACES[this.id].appCfg
-            }
-    		surfaces.push(x);
-    	});
-		jstring = JSON.stringify(surfaces);
-    	hash =  window.btoa(jstring);
-    	data = {};
-		data.json = jstring;
-		console.log(data);
-		$.post( "./livesurfaces", data ).done(function( data ) {
-			alert(data);
-		});
-    }
+
     
     
     function preview(){
@@ -196,22 +375,7 @@
     	$("#closeIframe").fadeIn();
     }
     
-    function previewCalendar(id){
-    
-    	jstring = JSON.stringify(currentCalendar[id].data);
-    	hash =  window.btoa(jstring)
-    	loc = window.location.href.split("/cue")[0]+'/setup#'+hash
-    	
-    	$('<iframe>', {
-   			src: loc,
-   			id:  'preview',
-   			frameborder: 0,
-   			scrolling: 'no'
-   		}).appendTo('body');
-    	
-    	$("#closeIframe").fadeIn();
-    }
-    
+
     
     
     function allowDrop(ev) {
@@ -272,42 +436,6 @@
         }
     }
         
-	currentCalendar = []
-	function loadCalendar(){
-		loc = window.location.href.split("/cue")[0]+'/loadcalendar';
-		$.getJSON( loc, function( calendar ) {
-			// destroy existing calendar
-			currentCalendar = calendar;
-			$("#calendar").remove();
-			$('<div>', { id: 'calendar'}).appendTo('body');
-			// loop through the entries and build the ui
-			$('<div>', { id: 'calendarDataWrap'}).html("<div id='calendarMenu'><a href='#' onclick='$(\"#calendar\").fadeOut();' class='m-2 float-right'>Close Cue</a>&nbsp;<br>&nbsp;</div>").appendTo('#calendar');
-			$('<div>', { id: 'calendarDataWrap'}).appendTo('#calendar');
-			$('<div>', { id: "calendarPadTop"}).appendTo('#calendarDataWrap');
-			for(i=0;i < calendar.length; i++){
-				if(calendar[i].data[0].surfaceLink!==""){
-					mdate = new Date(parseInt(calendar[i].file.replace(',json', '')))
-					imgs = []
-					for(e=0;e<calendar[i].data.length;e++){
-						imgs.push("<img src='{{tmp.URL}}/shaderimg?i=" + calendar[i].data[e].surfaceLink + ".png'>");
-					}
-					mhtml = "<span class='calendarDate'><a href='javascript:previewCalendar("+i+")' class='m-2 btn btn-success float-right'>Preview</a> <div class='float-right m-2'>" + mdate.toDateString() + " : " + mdate.toTimeString().split(" ")[0] + " </div>   <!--<a href='#' class='m-1 btn btn-success float-left'>Set Live</a>--> <a href='javascript:deleteCalendarItem(" + i + ")' class='btn m-1 btn-danger float-left btn-sm '>Delete</a></span>"  + imgs.join('')
-					$('<div>', { id: "calendarItem"+i, class:'calendarItem'}).html(mhtml).appendTo('#calendarDataWrap');
-				}
-				
-			}
-			
-		});
-	}
-	
-	function deleteCalendarItem(item){
-		url = window.location.href.split("/cue")[0]+"/removecalendar?f="+currentCalendar[item].file
-		
-		$.get(url, function(data, status){
-    		$("#calendarItem"+item).remove();
-		
-  		});
-	}
 	
 	function newShader(){
 		loc = window.location.href.split("/cue")[0]+'/shader'
@@ -359,77 +487,8 @@
 	}
     </script>
     
-	  <!-- 
-	  
-	  <h3>streams</h3>	
-          <div>
-          {% for stream in tmp.streams %}
-          	<div>
-          		<span class="badge badge-secondary">{{stream.type}}</span> {{stream.url}} <a href="{{tmp.URL}}/stream?s={{stream.id}}" class="badge badge-primary">edit</a> &nbsp; <a href="{{tmp.URL}}/removestream?s={{stream.id}}" class="badge badge-danger">-</a>
-          	</div>
-          {% endfor %}
-          </div>
-          
-          
-      </main>-->
-    {% endif %}
-        <!--
-	{% if tmp.section == "stream" %}
-		<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
-			<h2>New Stream</H2>
-			<form method="post" action='{{tmp.URL}}/addstream'>
-				<div class="form-group">
-				    <label for="streamurl">Stream URL</label>
-				    <input type="text" class="form-control" id="streamurl" name="url" required value='{{tmp.stream.url}}'>
-				    <input type="hidden" name="id" value="{{tmp.stream.id}}">
-  				</div>
-  				<div class="form-group">
-  					<select class="browser-default custom-select" name="type">
-					  <option value="video" {% if tmp.stream.type == "video" %} selected {% endif %}>VIDEO URL</option>
-					  <option value="rtc" {% if tmp.stream.type == "rtc" %} selected {% endif %}>WEB RTC (WE WEBCAM)</option>
-					</select>
-  				</div>
-  				<button type="submit" class="btn btn-sm">  {% if tmp.stream.id == "" %} Add Stream{% else %} Update Stream {% endif %}</button>
-			</form>
-		</main>
-		{% endif %}
-	{% if tmp.section == "content" %}
-	<main role="main" class="col-md-9 mx-auto col-lg-10 pt-3 px-4">
-	  <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-0 ">
-            <h1 class="h2">My Library</h1>
-            <div class="btn-toolbar mb-2 mb-md-0">
-              <div class="btn-group mr-2">
-                <a href="{{tmp.URL}}/shader" class="btn btn-sm btn-outline-secondary">New GLSLShader</a>
-                <a href="{{tmp.URL}}/stream" class="btn btn-sm btn-outline-secondary">New Stream</a>
-              </div>
-              
-            </div>
-          </div>
-	 	  <h3>shaders</h3>	
-          <div>
-          <script>
-          function loadShader(img){
-          	hash = $(img).attr('src').replace(".png", "").split('i=')[1];
-          	loc = window.location.href.split("/content")[0]+'/shader#'+hash
-          	document.location.href = loc
-          }
-          </script>
-          {% for shader in tmp.shaders %}
-          		<img src="{{tmp.URL}}/shaderimg?i={{ shader }}" class='shaderImg' onclick="loadShader(this)">
-          {% endfor %}
-          </div>
-          <h3>streams</h3>	
-          <div>
-          {% for stream in tmp.streams %}
-          	<div>
-          		<span class="badge badge-secondary">{{stream.type}}</span> {{stream.url}} <a href="{{tmp.URL}}/stream?s={{stream.id}}" class="badge badge-primary">edit</a> &nbsp; <a href="{{tmp.URL}}/removestream?s={{stream.id}}" class="badge badge-danger">-</a>
-          	</div>
-          {% endfor %}
-          </div>
-          </div>
-	 </main>
 	 {% endif %}
-        -->
+  
       </div>
     </div>
 

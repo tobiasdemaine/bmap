@@ -26,7 +26,13 @@ an artSite plugin tool for creating augmented projection installations in a webG
 
 * select Fullscreen
 
--- make a cycling of shaders option in admin
+-- playlists
+	-- 	add to playlist
+		-- item name
+		-- item time length
+		-- default play List
+
+
 
 	
 

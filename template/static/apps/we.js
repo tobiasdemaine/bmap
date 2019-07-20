@@ -261,7 +261,7 @@ var we = function() {
                 'top': '50%',
                 'left': '50%',
                 'transform': 'translate(-50%, -50%)',
-                'background-color': 'rgba(254, 254, 254, 0.9)',
+                'background-color': 'rgba(0, 0, 0, 0.7)',
                 'width': '80%',
                 'padding': '20px',
                 'border-radius': '10px'

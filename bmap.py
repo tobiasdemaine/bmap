@@ -32,6 +32,10 @@ def render(artwork, user, path, settings):
 			auth = True
 		if path == 'loadshader':
 			auth = True
+		if path == 'getdefaultplaylist':
+			auth = True
+		if path == 'getplaylist':
+			auth = True
 		if auth == True:
 			templateData = {}
 			templateData['artwork'] = artwork
@@ -40,11 +44,77 @@ def render(artwork, user, path, settings):
 			session["path"] = templateData['URL']
 			if path != None:		
 				templateData['section'] = path
+				if path == 'getplaylists':
+					#get the plalists from playlist directory
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists"
+					if not os.path.exists(directory):
+						os.makedirs(directory)
+					
+					playListFiles = os.listdir(directory)
+					playLists = []
+					pattern = "*.json" 
+					for playlist in playListFiles:
+						if fnmatch.fnmatch(playlist, pattern):
+							playLists.append(playlist.replace(".json", ""))
+					
+					return jsonify(playLists)
+				if path == 'deleteplaylist':
+					playlist = request.args.get("list")
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists"
+					playlistfile = directory + "/" + playlist + ".json"
+					if os.path.exists(playlistfile) == True:
+						os.remove(playlistfile)
+						return '{ "response" : "playlist deleted" }'
+					else:
+						return '{ "response" : "playlist does not exist" }'
+				if path == 'getplaylist':
+					playlist = request.args.get("list");
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists"
+					playlistfile = directory + "/" + playlist + ".json"
+					if os.path.exists(playlistfile) == True:
+						return  send_file(playlistfile)
+				if path == 'getdefaultplaylist':
+					fileNamePath = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists/defaultPlayList.txt"
+					contents = ""
+					if os.path.exists(fileNamePath) == True:
+						with open(fileNamePath) as f:
+							contents = f.read()
+						
+					return '{ "defalutPlayList" : "' + contents+ '" }'
+				if path == 'defaultplaylist':
+					fileNamePath = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists/defaultPlayList.txt"
+					playlist = request.args.get("list")
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists"
+					if os.path.exists(directory + "/" + playlist + ".json"):
+						file = open(fileNamePath, 'w') 
+						file.write(playlist) 
+						file.close()
+						return '{ "response" : "default playlist saved" }'
+					else:
+						return '{ "response" : "playlist does not exist" }'
+					
+				if path == 'saveplaylist':
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/" + str(artwork.adminID) + "/bmap/" + str(artwork.id) + "/playlists"
+					if not os.path.exists(directory):
+						os.makedirs(directory)
+						
+					playlist = request.form.get("list");
+					plist = json.loads(playlist)
+					print(plist)
+					#if plist.has_key('title'):
+					jsonFileNamePath = directory + "/" + plist['title'] + ".json"
+					file = open(jsonFileNamePath, 'w') 
+					file.write(playlist) 
+					file.close()
+					return '{ "respone" : "playlist saved" }'
+					#else:
+					#	return '{ "respone" : "bad request" }'
 				if path == 'setup':
 					currentTemplate = "bMap.html"
 				
 				if path == 'shader':	
 					currentTemplate = "shaderEdit.html"
+					
 				if path == "saveshader":
 					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/bmap/" + str(artwork.id) + "/shaders"
 					if not os.path.exists(directory):

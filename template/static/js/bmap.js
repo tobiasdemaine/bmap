@@ -1593,6 +1593,53 @@ function loadLiveSurfaces(){
 	setTimeout(loadLiveSurfaces, 1000);
 }
 
+lastplaylist = ""
+function defaultPlayList(){
+	ur = theURL.split("/").reverse()
+	_url = "/" + ur[2] + "/" + ur[1] + "/";
+	nowTime = new Date;
+	url = _url + "getdefaultplaylist";
+	$.getJSON( url, function( data ) {
+		if(lastplaylist != data.defalutPlayList){
+			lastplaylist = data.defalutPlayList;
+			getPlayList(lastplaylist);
+			
+			
+		}
+	});
+	setTimeout(defaultPlayList, 1000);
+}
+
+currentPlayList = [];
+currentPlayListSlot = 0;
+currentPlayListTimeOut = "";
+function getPlayList(playListName){
+	console.log("getPlayList("+playListName+")");
+	ur = theURL.split("/").reverse()
+	_url = "/" + ur[2] + "/" + ur[1] + "/";
+	url = _url + "getplaylist";
+	data = { list : playListName }
+	$.getJSON(url, data).done(function(playList){
+		console.log(playList)
+		currentPlayList = playList;
+		currentPlayListSlot = 0;
+		runPlayList()
+		
+		// start plying play list
+	});
+}
+
+function runPlayList(){
+	console.log("runPlayList()")
+	previewSurfaceID = 0
+	previewSurfaces = currentPlayList.playItem[currentPlayListSlot]
+	surfacesLoad();
+	currentPlayListSlot++;	
+	if( currentPlayListSlot == currentPlayList.playItem.length){
+		currentPlayListSlot = 0;
+	}
+	currentPlayListTimeOut = setTimeout(runPlayList, 1 * 60 * 1000);
+}
 
 function ModelLoader(){
 	//console.log("MODELLOADER");
@@ -1672,7 +1719,8 @@ function DrawModels(data){
 		}	
 	}
 	if( live == true ){
-		loadLiveSurfaces()
+		//loadLiveSurfaces()
+		defaultPlayList();
 		selectedCamera = cameraOrth
 		
 	}
