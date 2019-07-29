@@ -109,6 +109,21 @@ def render(artwork, user, path, settings):
 					return '{ "respone" : "playlist saved" }'
 					#else:
 					#	return '{ "respone" : "bad request" }'
+				
+				print(path)
+				if path == "savedataurltofile":
+					directory = os.path.dirname(os.path.abspath(__file__)) + "/files/"+str(user.id)	+"/upload"
+					
+					if not os.path.exists(directory):
+						os.makedirs(directory)
+					
+					
+					imageFileNamePath = directory + "/" +  request.form.get("fileName"); 
+					#print(request.form.get("fileData"), request.form.get("fileName"))
+					convert_and_save(str(request.form.get("fileData")), imageFileNamePath)
+					outFile = "/f/bmap/files/"+str(user.id)+"/upload/" +  request.form.get("fileName")
+					return '{ "url" : "' + outFile + '" }'
+				
 				if path == 'setup':
 					currentTemplate = "bMap.html"
 				

@@ -267,7 +267,7 @@ var we = function() {
                 'border-radius': '10px'
             })
 
-            $("#appConfigDialog").append("<h3>WE Config</h3>")
+            $("#appConfigDialog").append("<h3  style='font-weight:100;'>WE Config</h3>")
             $("#appConfigDialog").append("<div class='form-group'><label for='weTypeSelect'>Type</label><SELECT id='weTypeSelect' class='form-control'>"+"<option value='WeFace'>WeFace</option>" +
                 "<option value='AdultFace'>AdultFace</option>" +
                 "<option value='AdultAndrogynousFace'>AdultAndrogynousFace</option>" +
