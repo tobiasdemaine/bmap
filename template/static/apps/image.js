@@ -7,6 +7,7 @@ var image = function() {
 		return this.texture;
 	}
 	this.configGUI = function(values){
+		console.log(values)
 	    var docHeight = $(document).height();
 
 		$("body").append("<div id='appConfigOverlay'><div id='appConfigDialog'></div>");
@@ -44,8 +45,8 @@ var image = function() {
             //values can be loaded in
             for (v in values){
 				 if(v == 'imgURL'){
-				 	 $("#currentImage").html("<img src='"+imgURL+"' style='height:100px;'>")
-					 $('#imgURL').val(imgURL)
+				 	 $("#currentImage").html("<img src='"+values[v]+"' style='height:100px;'>")
+					 $('#imgURL').val(values[v])
 				 }
 			}
 		}
@@ -86,13 +87,14 @@ var image = function() {
 			 if(errors != ''){
 			   alert(errors)
 			}else{
-				cfg = { 
+				_cfg = { 
 					'imgURL' : _imgURL
 				}
 				$("#imageUploadButton").unbind('click');
 				$("#appConfigOverlay").remove();
 				// calls  function to store initData
-				appSetLoadParamsFromConfig(cfg);
+				console.log(_cfg)
+				appSetLoadParamsFromConfig(_cfg);
 			}
         });
 	}
