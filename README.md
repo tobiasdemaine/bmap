@@ -2,7 +2,7 @@
 an ar[t] plugin for creating augmented projection installations in a webGL capable browser 
 ---------
 
-* Display and Capture phase sequence >>  more work on phaze lines and position
+* Display and Capture phase sequence
 
 * Process Phase Map
 
@@ -26,13 +26,9 @@ an ar[t] plugin for creating augmented projection installations in a webGL capab
 
 * select Fullscreen
 
--- playlists
-	-- 	add to playlist
-		-- item name
-		-- item time length
-		-- default play List
+* GLSL Code Editor
 
-
+SEE https://github.com/tobiasdemaine/bmapShaders for more info
 
 	
 
