@@ -1,5 +1,5 @@
 # bmap
-an artSite plugin tool for creating augmented projection installations in a webGL capable browser 
+an ar[t] plugin for creating augmented projection installations in a webGL capable browser 
 ---------
 
 * Display and Capture phase sequence >>  more work on phaze lines and position
